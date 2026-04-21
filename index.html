@@ -346,8 +346,15 @@ function PaepyeongOnboarding() {
 
         {/* title */}
         <div style={{ marginTop: 28, marginBottom: 22 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999, background: 'linear-gradient(135deg, rgba(61,255,166,0.15), rgba(61,255,166,0.05))', border: '1px solid rgba(61,255,166,0.35)', boxShadow: '0 0 12px rgba(61,255,166,0.2)', marginBottom: 14 }}>
-            <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: '#3DFFA6', letterSpacing: 1 }}>✦ OOTD UPLOAD ✦</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999, background: 'linear-gradient(135deg, rgba(61,255,166,0.15), rgba(61,255,166,0.05))', border: '1px solid rgba(61,255,166,0.35)', boxShadow: '0 0 12px rgba(61,255,166,0.2)' }}>
+              <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: '#3DFFA6', letterSpacing: 1 }}>✦ OOTD UPLOAD ✦</span>
+            </div>
+            <button onClick={() => {
+              const current = getApiKey();
+              const key = window.prompt('Claude API 키를 입력하세요:', current);
+              if (key !== null) setApiKey(key);
+            }} style={{ background: 'none', border: `1px solid ${getApiKey() ? 'rgba(61,255,166,0.5)' : 'rgba(255,255,255,0.2)'}`, borderRadius: 8, padding: '6px 10px', cursor: 'pointer', color: getApiKey() ? '#3DFFA6' : 'rgba(255,255,255,0.4)', fontSize: 15, lineHeight: 1 }} title="API 키 설정">⚙</button>
           </div>
           <h1 style={{ margin: 0, fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 26, lineHeight: 1.25, letterSpacing: -0.5, color: '#fff' }}>
             나를 표현할<br/>
