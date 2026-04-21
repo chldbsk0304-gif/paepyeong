@@ -1,0 +1,2104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>패평 · PAEPYEONG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html, body {
+    margin: 0; padding: 0;
+    width: 100%; min-height: 100vh;
+    background: #0a0a0a;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(61,255,166,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(255,61,220,0.06) 0%, transparent 50%),
+      #0a0a0a;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 40px 20px;
+    box-sizing: border-box;
+  }
+
+  #root {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 16px;
+  }
+
+  @keyframes ppTwinkle {
+    0%, 100% { opacity: 0.3; transform: scale(0.85) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1.15) rotate(180deg); }
+  }
+  @keyframes ppBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+  @keyframes ppShake {
+    0%, 100% { transform: translate(0, 0) rotate(0); }
+    20% { transform: translate(-1.5px, 1px) rotate(-0.8deg); }
+    40% { transform: translate(1.5px, -1px) rotate(0.8deg); }
+    60% { transform: translate(-1px, -1px) rotate(-0.4deg); }
+    80% { transform: translate(1px, 1px) rotate(0.4deg); }
+  }
+  @keyframes ppHeartBurst {
+    0% { opacity: 1; transform: rotate(var(--d,0deg)) translateY(0) scale(1); }
+    100% { opacity: 0; transform: rotate(var(--d,0deg)) translateY(-14px) scale(0.4); }
+  }
+  @keyframes ppSlideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+  }
+  @keyframes ppSlideInLeft {
+    from { transform: translateX(-100%); opacity: 0; }
+    to   { transform: translateX(0);     opacity: 1; }
+  }
+
+  .pp-caption {
+    font-family: "Press Start 2P", monospace;
+    font-size: 9px;
+    color: rgba(61,255,166,0.6);
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(61,255,166,0.4);
+  }
+
+  button { font-family: inherit; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- React -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<!-- React Router v5 (UMD) -->
+<script src="https://unpkg.com/history@4.10.1/umd/history.js"></script>
+<script src="https://unpkg.com/react-router@5.3.4/umd/react-router.min.js"></script>
+<script src="https://unpkg.com/react-router-dom@5.3.4/umd/react-router-dom.min.js"></script>
+<!-- Babel -->
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="src/data/dummyProducts.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+const { HashRouter, Switch, Route, useHistory, useLocation } = ReactRouterDOM;
+
+// ═══════════════════════════════════════════════════════════════
+// iOS DEVICE FRAME
+// ═══════════════════════════════════════════════════════════════
+
+function IOSStatusBar({ dark = false }) {
+  const c = dark ? '#fff' : '#000';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '21px 24px 19px', boxSizing: 'border-box',
+      position: 'relative', zIndex: 20, width: '100%',
+    }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ fontFamily: '-apple-system, "SF Pro", system-ui', fontWeight: 590, fontSize: 17, color: c }}>9:41</span>
+      </div>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+        <svg width="19" height="12" viewBox="0 0 19 12">
+          <rect x="0" y="7.5" width="3.2" height="4.5" rx="0.7" fill={c}/>
+          <rect x="4.8" y="5" width="3.2" height="7" rx="0.7" fill={c}/>
+          <rect x="9.6" y="2.5" width="3.2" height="9.5" rx="0.7" fill={c}/>
+          <rect x="14.4" y="0" width="3.2" height="12" rx="0.7" fill={c}/>
+        </svg>
+        <svg width="17" height="12" viewBox="0 0 17 12">
+          <path d="M8.5 3.2C10.8 3.2 12.9 4.1 14.4 5.6L15.5 4.5C13.7 2.7 11.2 1.5 8.5 1.5C5.8 1.5 3.3 2.7 1.5 4.5L2.6 5.6C4.1 4.1 6.2 3.2 8.5 3.2Z" fill={c}/>
+          <path d="M8.5 6.8C9.9 6.8 11.1 7.3 12 8.2L13.1 7.1C11.8 5.9 10.2 5.1 8.5 5.1C6.8 5.1 5.2 5.9 3.9 7.1L5 8.2C5.9 7.3 7.1 6.8 8.5 6.8Z" fill={c}/>
+          <circle cx="8.5" cy="10.5" r="1.5" fill={c}/>
+        </svg>
+        <svg width="27" height="13" viewBox="0 0 27 13">
+          <rect x="0.5" y="0.5" width="23" height="12" rx="3.5" stroke={c} strokeOpacity="0.35" fill="none"/>
+          <rect x="2" y="2" width="20" height="9" rx="2" fill={c}/>
+          <path d="M25 4.5V8.5C25.8 8.2 26.5 7.2 26.5 6.5C26.5 5.8 25.8 4.8 25 4.5Z" fill={c} fillOpacity="0.4"/>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+function IOSDevice({ children, dark = false }) {
+  return (
+    <div style={{
+      width: 390, height: 800, borderRadius: 48, overflow: 'hidden',
+      position: 'relative', background: dark ? '#000' : '#F2F2F7',
+      boxShadow: '0 40px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.12)',
+    }}>
+      {/* dynamic island */}
+      <div style={{
+        position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)',
+        width: 126, height: 37, borderRadius: 24, background: '#000', zIndex: 50,
+      }}/>
+      {/* status bar */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
+        <IOSStatusBar dark={dark}/>
+      </div>
+      {/* content fills full height */}
+      <div style={{ height: '100%', overflow: 'hidden' }}>{children}</div>
+      {/* home indicator */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 60,
+        height: 34, display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
+        paddingBottom: 8, pointerEvents: 'none',
+      }}>
+        <div style={{ width: 139, height: 5, borderRadius: 100, background: dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.25)' }}/>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SHARED PRIMITIVES
+// ═══════════════════════════════════════════════════════════════
+
+function Sparkle({ size = 14, color = '#3DFFA6', style = {}, delay = 0 }) {
+  return (
+    <div style={{ position: 'absolute', width: size, height: size, pointerEvents: 'none', animation: `ppTwinkle 2.4s ${delay}s ease-in-out infinite`, ...style }}>
+      <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 2, transform: 'translateX(-50%)', background: `linear-gradient(to bottom, transparent, ${color}, transparent)`, borderRadius: 2 }}/>
+      <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 2, transform: 'translateY(-50%)', background: `linear-gradient(to right, transparent, ${color}, transparent)`, borderRadius: 2 }}/>
+      <div style={{ position: 'absolute', left: '50%', top: '50%', width: size * 0.32, height: size * 0.32, transform: 'translate(-50%, -50%)', background: color, borderRadius: '50%', boxShadow: `0 0 ${size * 0.6}px ${color}` }}/>
+    </div>
+  );
+}
+
+function Diamond({ size = 8, color = '#fff', style = {} }) {
+  return <div style={{ position: 'absolute', width: size, height: size, background: color, transform: 'rotate(45deg)', boxShadow: `0 0 ${size}px ${color}88`, pointerEvents: 'none', ...style }}/>;
+}
+
+function MiniSpark({ color = '#3DFFA6', size = 8, style = {} }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 10 10" style={{ position: 'absolute', ...style }}>
+      <path d="M5 0 L6 4 L10 5 L6 6 L5 10 L4 6 L0 5 L4 4 Z" fill={color}/>
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCREEN 01 — ONBOARDING
+// ═══════════════════════════════════════════════════════════════
+
+function UploadSlot({ index, filled, onClick, big = false }) {
+  return (
+    <button onClick={onClick} style={{ position: 'relative', width: '100%', aspectRatio: big ? '2 / 1' : '1 / 1', border: 'none', padding: 0, background: 'transparent', cursor: 'pointer', outline: 'none' }}>
+      <div style={{ position: 'absolute', inset: 0, borderRadius: 18, padding: 2, background: filled ? 'linear-gradient(135deg, #fff 0%, #3DFFA6 30%, #25d688 50%, #3DFFA6 70%, #fff 100%)' : 'linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(61,255,166,0.35) 50%, rgba(255,255,255,0.2) 100%)' }}>
+        <div style={{ width: '100%', height: '100%', borderRadius: 16, background: filled ? 'radial-gradient(circle at 30% 20%, #4a2466 0%, #1a0d2e 60%, #0a0516 100%)' : 'rgba(255,255,255,0.03)', border: filled ? 'none' : '1.5px dashed rgba(61,255,166,0.55)', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: filled ? 'inset 0 0 30px rgba(61,255,166,0.3), 0 0 20px rgba(61,255,166,0.35)' : 'inset 0 0 20px rgba(61,255,166,0.08)' }}>
+          {!filled && <div style={{ position: 'absolute', inset: 6, borderRadius: 12, border: '1px dashed rgba(255,255,255,0.15)' }}/>}
+          {filled ? (
+            <>
+              <div style={{ position: 'absolute', inset: 8, borderRadius: 12, background: `repeating-linear-gradient(45deg, rgba(61,255,166,0.12) 0px, rgba(61,255,166,0.12) 6px, rgba(255,255,255,0.04) 6px, rgba(255,255,255,0.04) 12px)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: 'rgba(255,255,255,0.55)', letterSpacing: 1 }}>OOTD_{String(index + 1).padStart(2, '0')}</div>
+              <div style={{ position: 'absolute', top: 8, right: 8, width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(135deg, #fff 0%, #3DFFA6 50%, #25d688 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 12px rgba(61,255,166,0.8)' }}>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="#1A1A1A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </div>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40%', background: 'linear-gradient(to bottom, rgba(255,255,255,0.18), transparent)', pointerEvents: 'none', borderRadius: '16px 16px 0 0' }}/>
+              <Sparkle size={12} color="#fff" style={{ top: '30%', left: '20%' }} delay={0.2}/>
+              <Sparkle size={16} color="#3DFFA6" style={{ bottom: '20%', right: '25%' }} delay={0.8}/>
+            </>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, position: 'relative', zIndex: 2 }}>
+              <div style={{ width: 36, height: 36, position: 'relative' }}>
+                <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 3, transform: 'translateY(-50%)', background: 'linear-gradient(to right, transparent, #3DFFA6, transparent)', borderRadius: 3, boxShadow: '0 0 8px #3DFFA6' }}/>
+                <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 3, transform: 'translateX(-50%)', background: 'linear-gradient(to bottom, transparent, #3DFFA6, transparent)', borderRadius: 3, boxShadow: '0 0 8px #3DFFA6' }}/>
+              </div>
+              <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: 'rgba(255,255,255,0.45)', letterSpacing: 1 }}>{String(index + 1).padStart(2, '0')}</div>
+            </div>
+          )}
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function PaepyeongOnboarding() {
+  const history = useHistory();
+  const [slots, setSlots] = useState([false, false, false, false, false]);
+  const filledCount = slots.filter(Boolean).length;
+  const toggle = (i) => setSlots(s => s.map((v, idx) => idx === i ? !v : v));
+
+  const handleContinue = () => {
+    if (filledCount >= 5) history.push('/result');
+  };
+
+  return (
+    <div style={{ width: '100%', height: '100%', background: '#1A1A1A', position: 'relative', overflow: 'hidden', fontFamily: '"Space Grotesk", sans-serif', color: '#fff', animation: 'ppSlideInLeft 0.35s ease' }}>
+      <div style={{ position: 'absolute', top: '-20%', left: '-10%', width: '80%', height: '60%', background: 'radial-gradient(circle, rgba(61,255,166,0.18) 0%, transparent 60%)', pointerEvents: 'none' }}/>
+      <div style={{ position: 'absolute', bottom: '-10%', right: '-15%', width: '70%', height: '50%', background: 'radial-gradient(circle, rgba(255,61,220,0.12) 0%, transparent 60%)', pointerEvents: 'none' }}/>
+      <div style={{ position: 'absolute', inset: 0, opacity: 0.25, backgroundImage: `linear-gradient(rgba(61,255,166,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(61,255,166,0.08) 1px, transparent 1px)`, backgroundSize: '32px 32px', maskImage: 'radial-gradient(ellipse at 50% 40%, black 30%, transparent 80%)', WebkitMaskImage: 'radial-gradient(ellipse at 50% 40%, black 30%, transparent 80%)', pointerEvents: 'none' }}/>
+      <Sparkle size={18} color="#3DFFA6" style={{ top: 90, right: 24 }} delay={0}/>
+      <Sparkle size={12} color="#fff" style={{ top: 130, right: 56 }} delay={0.6}/>
+      <Sparkle size={22} color="#3DFFA6" style={{ top: 160, left: 18 }} delay={1.2}/>
+      <Diamond size={6} color="#3DFFA6" style={{ top: 105, left: '45%' }}/>
+
+      <div style={{ position: 'relative', zIndex: 2, height: '100%', display: 'flex', flexDirection: 'column', padding: '70px 22px 24px', boxSizing: 'border-box' }}>
+        {/* progress */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: '#3DFFA6', letterSpacing: 1, textShadow: '0 0 8px rgba(61,255,166,0.6)' }}>★ STEP 02 / 04</div>
+            <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 10, color: '#fff' }}>{filledCount}<span style={{ color: 'rgba(255,255,255,0.4)' }}> / 5</span></div>
+          </div>
+          <div style={{ display: 'flex', gap: 4, height: 14, padding: 2, borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(61,255,166,0.25)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.5)' }}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} style={{ flex: 1, borderRadius: 4, background: i < filledCount ? 'linear-gradient(to bottom, #fff 0%, #3DFFA6 40%, #25d688 100%)' : 'rgba(255,255,255,0.06)', boxShadow: i < filledCount ? '0 0 10px rgba(61,255,166,0.9), inset 0 1px 1px rgba(255,255,255,0.7)' : 'inset 0 1px 2px rgba(0,0,0,0.4)', transition: 'all 0.3s ease' }}/>
+            ))}
+          </div>
+        </div>
+
+        {/* title */}
+        <div style={{ marginTop: 28, marginBottom: 22 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999, background: 'linear-gradient(135deg, rgba(61,255,166,0.15), rgba(61,255,166,0.05))', border: '1px solid rgba(61,255,166,0.35)', boxShadow: '0 0 12px rgba(61,255,166,0.2)', marginBottom: 14 }}>
+            <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: '#3DFFA6', letterSpacing: 1 }}>✦ OOTD UPLOAD ✦</span>
+          </div>
+          <h1 style={{ margin: 0, fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 26, lineHeight: 1.25, letterSpacing: -0.5, color: '#fff' }}>
+            나를 표현할<br/>
+            <span style={{ background: 'linear-gradient(90deg, #fff 0%, #3DFFA6 50%, #fff 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: 'drop-shadow(0 0 12px rgba(61,255,166,0.4))' }}>전신 OOTD 5장</span>을<br/>
+            업로드해 주세요
+          </h1>
+          <p style={{ margin: '10px 0 0', fontSize: 13, lineHeight: 1.5, color: 'rgba(255,255,255,0.55)' }}>최근 6개월 이내 사진을 추천해요 · 얼굴이 보이지 않아도 OK</p>
+        </div>
+
+        {/* scrollable grid — padded so content clears the fixed CTA */}
+        <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', scrollbarWidth: 'none', paddingBottom: 120 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {[0,1,2,3].map(i => <UploadSlot key={i} index={i} filled={slots[i]} onClick={() => toggle(i)}/>)}
+            <div style={{ gridColumn: '1 / -1' }}><UploadSlot index={4} filled={slots[4]} onClick={() => toggle(4)} big/></div>
+          </div>
+        </div>
+
+        {/* CTA — fixed to bottom of screen */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 22px 28px', background: 'linear-gradient(180deg, transparent 0%, rgba(26,26,26,0.85) 25%, #1A1A1A 60%)', backdropFilter: 'blur(8px)' }}>
+          <Sparkle size={14} color="#fff" style={{ top: 0, right: 32 }} delay={0.4}/>
+          <button
+            onClick={handleContinue}
+            disabled={filledCount < 5}
+            style={{ width: '100%', height: 58, border: 'none', borderRadius: 999, padding: 2, background: filledCount >= 5 ? 'linear-gradient(135deg, #fff 0%, #3DFFA6 25%, #25d688 50%, #3DFFA6 75%, #fff 100%)' : 'linear-gradient(135deg, rgba(255,255,255,0.15), rgba(61,255,166,0.2), rgba(255,255,255,0.1))', cursor: filledCount >= 5 ? 'pointer' : 'not-allowed', boxShadow: filledCount >= 5 ? '0 0 24px rgba(61,255,166,0.8), 0 6px 20px rgba(61,255,166,0.35)' : '0 4px 12px rgba(0,0,0,0.4)', transition: 'all 0.3s ease' }}>
+            <div style={{ width: '100%', height: '100%', borderRadius: 999, background: filledCount >= 5 ? 'linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(61,255,166,0.95) 45%, #25d688 100%)' : 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 17, letterSpacing: 0.5, color: filledCount >= 5 ? '#0a2a18' : 'rgba(255,255,255,0.4)', position: 'relative', overflow: 'hidden' }}>
+              {filledCount >= 5 && <div style={{ position: 'absolute', top: 0, bottom: '50%', left: 0, right: 0, background: 'linear-gradient(180deg, rgba(255,255,255,0.5), transparent)', borderRadius: '999px 999px 0 0', pointerEvents: 'none' }}/>}
+              <span style={{ position: 'relative', zIndex: 2 }}>평가 받기</span>
+              <span style={{ position: 'relative', zIndex: 2, fontSize: 18 }}>▸</span>
+            </div>
+          </button>
+          <div style={{ textAlign: 'center', marginTop: 10, fontFamily: '"Press Start 2P", monospace', fontSize: 8, letterSpacing: 1.5, color: filledCount >= 5 ? '#3DFFA6' : 'rgba(255,255,255,0.3)', textShadow: filledCount >= 5 ? '0 0 6px rgba(61,255,166,0.6)' : 'none' }}>
+            {filledCount >= 5 ? '✦ READY TO GO ✦' : `★ ${5 - filledCount} MORE TO UNLOCK ★`}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCREEN 02 — EVALUATION RESULT
+// ═══════════════════════════════════════════════════════════════
+
+function useCountUp(target, duration = 1400, delay = 200) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    let raf;
+    const t = setTimeout(() => {
+      const start = performance.now();
+      const tick = (now) => {
+        const p = Math.min(1, (now - start) / duration);
+        setN(Math.round(target * (1 - Math.pow(1 - p, 3))));
+        if (p < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    }, delay);
+    return () => { clearTimeout(t); if (raf) cancelAnimationFrame(raf); };
+  }, [target, duration, delay]);
+  return n;
+}
+
+function StatBar({ label, value, max = 10, color, delay = 0 }) {
+  const [w, setW] = useState(0);
+  const displayValue = useCountUp(value, 900, delay + 300);
+  useEffect(() => {
+    const t = setTimeout(() => setW((value / max) * 100), delay);
+    return () => clearTimeout(t);
+  }, [value, max, delay]);
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ width: 70, fontFamily: '"Press Start 2P", monospace', fontSize: 9, letterSpacing: 1, color: 'rgba(255,255,255,0.85)' }}>{label}</div>
+      <div style={{ flex: 1, height: 18, position: 'relative', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.6)', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', pointerEvents: 'none', zIndex: 3 }}>
+          {Array.from({ length: max - 1 }).map((_, i) => <div key={i} style={{ flex: 1, borderRight: '1px dashed rgba(0,0,0,0.5)' }}/>)}
+          <div style={{ flex: 1 }}/>
+        </div>
+        <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: `${w}%`, background: `linear-gradient(180deg, rgba(255,255,255,0.7) 0%, ${color} 30%, ${color} 70%, rgba(0,0,0,0.2) 100%)`, boxShadow: `0 0 10px ${color}cc`, borderRadius: 2, transition: 'width 1.1s cubic-bezier(0.22, 1, 0.36, 1)' }}/>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(to bottom, rgba(255,255,255,0.35), transparent)', pointerEvents: 'none' }}/>
+      </div>
+      <div style={{ width: 36, textAlign: 'right', fontFamily: '"Press Start 2P", monospace', fontSize: 11, color, textShadow: `0 0 6px ${color}aa` }}>{String(displayValue).padStart(2, '0')}</div>
+    </div>
+  );
+}
+
+function GradeBadge({ letter, active, color }) {
+  return (
+    <div style={{ flex: 1, aspectRatio: '1', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: active ? 'scale(1.1)' : 'none', transition: 'all 0.3s ease' }}>
+      <div style={{ position: 'absolute', inset: 0, borderRadius: 12, padding: active ? 2 : 1, background: active ? `linear-gradient(135deg, #fff, ${color}, #fff, ${color})` : 'rgba(255,255,255,0.12)', boxShadow: active ? `0 0 16px ${color}cc, 0 0 32px ${color}66` : 'none' }}>
+        <div style={{ width: '100%', height: '100%', borderRadius: 11, background: active ? `radial-gradient(circle at 30% 25%, ${color}44 0%, #1a0a14 70%)` : 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Press Start 2P", monospace', fontSize: active ? 22 : 15, color: active ? '#fff' : 'rgba(255,255,255,0.3)', textShadow: active ? `0 0 12px ${color}, 0 0 24px ${color}88, 2px 2px 0 rgba(0,0,0,0.8)` : 'none', letterSpacing: 1 }}>{letter}</div>
+      </div>
+      {active && (
+        <>
+          <Sparkle size={10} color="#fff" style={{ top: -4, right: -4 }} delay={0.2}/>
+          <Sparkle size={12} color={color} style={{ bottom: -6, left: -2 }} delay={0.7}/>
+          <div style={{ position: 'absolute', bottom: -18, left: '50%', transform: 'translateX(-50%)', fontFamily: '"Press Start 2P", monospace', fontSize: 7, letterSpacing: 1.5, color, textShadow: `0 0 6px ${color}`, whiteSpace: 'nowrap' }}>▲ YOU ▲</div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function PaepyeongResult() {
+  const history = useHistory();
+  const score = useCountUp(10, 1600, 400);
+  const stats = [
+    { label: 'TRENDY', value: 2, color: '#FF6EAF' },
+    { label: 'COLOR',  value: 3, color: '#3DFFA6' },
+    { label: 'FIT',    value: 1, color: '#FF6EAF' },
+    { label: 'STYLE',  value: 3, color: '#3DFFA6' },
+  ];
+  const grades = ['S', 'A', 'B', 'C', 'F'];
+  const gradeColor = '#FF6EAF';
+
+  return (
+    <div style={{ width: '100%', height: '100%', background: '#1A1A1A', position: 'relative', overflow: 'hidden', fontFamily: '"Space Grotesk", sans-serif', color: '#fff', animation: 'ppSlideIn 0.35s ease' }}>
+      <div style={{ position: 'absolute', top: '-15%', left: '-20%', width: '80%', height: '50%', background: 'radial-gradient(circle, rgba(255,110,175,0.2) 0%, transparent 65%)', pointerEvents: 'none' }}/>
+      <div style={{ position: 'absolute', bottom: '-10%', right: '-20%', width: '80%', height: '50%', background: 'radial-gradient(circle, rgba(61,255,166,0.13) 0%, transparent 65%)', pointerEvents: 'none' }}/>
+      <div style={{ position: 'absolute', inset: 0, opacity: 0.18, backgroundImage: `linear-gradient(rgba(255,110,175,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(61,255,166,0.1) 1px, transparent 1px)`, backgroundSize: '28px 28px', maskImage: 'radial-gradient(ellipse at 50% 30%, black 20%, transparent 75%)', WebkitMaskImage: 'radial-gradient(ellipse at 50% 30%, black 20%, transparent 75%)' }}/>
+      <Sparkle size={18} color="#FF6EAF" style={{ top: 72, right: 22 }} delay={0}/>
+      <Sparkle size={12} color="#fff" style={{ top: 110, left: 28 }} delay={0.6}/>
+      <Sparkle size={20} color="#3DFFA6" style={{ top: 380, right: 14 }} delay={1.1}/>
+
+      <div style={{ position: 'relative', zIndex: 2, height: '100%', display: 'flex', flexDirection: 'column', padding: '62px 20px 20px', boxSizing: 'border-box' }}>
+        {/* RESULT badge */}
+        <div style={{ alignSelf: 'center', display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px 5px', borderRadius: 999, background: 'linear-gradient(135deg, rgba(255,110,175,0.25), rgba(255,110,175,0.08))', border: '1px solid rgba(255,110,175,0.6)', boxShadow: '0 0 16px rgba(255,110,175,0.35)' }}>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#FF6EAF', boxShadow: '0 0 8px #FF6EAF', animation: 'ppBlink 1.2s ease-in-out infinite' }}/>
+          <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 10, color: '#fff', letterSpacing: 3, textShadow: '0 0 8px rgba(255,110,175,0.8)' }}>RESULT</span>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#FF6EAF', boxShadow: '0 0 8px #FF6EAF', animation: 'ppBlink 1.2s 0.6s ease-in-out infinite' }}/>
+        </div>
+
+        {/* nickname + score */}
+        <div style={{ marginTop: 18, textAlign: 'center', position: 'relative' }}>
+          <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, letterSpacing: 3, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', marginBottom: 2 }}>YOUR STYLE NAME</div>
+          <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 34, letterSpacing: -0.5, lineHeight: 1, background: 'linear-gradient(180deg, #fff 0%, #fff 50%, #FF6EAF 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: 'drop-shadow(0 0 14px rgba(255,110,175,0.5))', display: 'inline-block' }}>"밤티.."</div>
+          <div style={{ marginTop: 10, display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 4 }}>
+            <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 54, color: '#FF6EAF', textShadow: `0 0 12px rgba(255,110,175,0.9), 0 0 24px rgba(255,110,175,0.5), 3px 3px 0 rgba(0,0,0,0.8), -1px -1px 0 #fff`, letterSpacing: 2, lineHeight: 1 }}>{String(score).padStart(2, '0')}</span>
+            <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 18, color: 'rgba(255,255,255,0.55)', letterSpacing: 1 }}>/ 100</span>
+          </div>
+          <Sparkle size={14} color="#fff" style={{ top: 40, left: 60 }} delay={0.8}/>
+          <Sparkle size={16} color="#FF6EAF" style={{ top: 28, right: 54 }} delay={0.2}/>
+        </div>
+
+        {/* one-liner */}
+        <div style={{ marginTop: 14, padding: '12px 14px', background: 'linear-gradient(135deg, rgba(255,110,175,0.12), rgba(255,110,175,0.02))', border: '1px solid rgba(255,110,175,0.35)', borderRadius: 12, textAlign: 'center', position: 'relative' }}>
+          <div style={{ position: 'absolute', top: -8, left: 14, fontFamily: '"Press Start 2P", monospace', fontSize: 7, letterSpacing: 1.5, color: '#FF6EAF', background: '#1A1A1A', padding: '2px 6px' }}>★ ONE LINE</div>
+          <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 20, letterSpacing: -0.3, color: '#fff', textShadow: '0 0 14px rgba(255,110,175,0.5)', lineHeight: 1.3 }}>"길거리 배에로록"</div>
+        </div>
+
+        {/* AI summary */}
+        <div style={{ marginTop: 10, padding: '10px 12px', background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(61,255,166,0.3)', borderRadius: 10, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+          <div style={{ flexShrink: 0, width: 28, height: 28, borderRadius: 6, background: 'linear-gradient(135deg, #3DFFA6, #25d688)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 10px rgba(61,255,166,0.5)', fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: '#0a2a18' }}>AI</div>
+          <div style={{ flex: 1, fontFamily: '"Space Grotesk", sans-serif', fontSize: 12.5, lineHeight: 1.5, color: 'rgba(255,255,255,0.75)' }}>색 조합은 과감한데 실루엣이 전부 따로 놀아요. 오버핏 + 와이드 + 레이어링까지 한꺼번에 터뜨리지 말고 한 가지만 키우세요.</div>
+        </div>
+
+        {/* stat bars */}
+        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 9 }}>
+          {stats.map((s, i) => <StatBar key={s.label} {...s} delay={500 + i * 130}/>)}
+        </div>
+
+        {/* grade row */}
+        <div style={{ marginTop: 24, position: 'relative' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: 'rgba(255,255,255,0.5)', letterSpacing: 1.5 }}>★ GRADE</div>
+            <div style={{ flex: 1, height: 1, margin: '0 10px', background: 'linear-gradient(to right, rgba(255,255,255,0.2), transparent)' }}/>
+            <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: gradeColor, letterSpacing: 1.5, textShadow: `0 0 6px ${gradeColor}` }}>F-RANK</div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, paddingBottom: 22 }}>
+            {grades.map((g) => g === 'F' ? (
+              <div key={g} style={{ flex: 1, animation: 'ppShake 0.12s 1.2s 8 ease-in-out' }}>
+                <GradeBadge letter={g} active color={gradeColor}/>
+              </div>
+            ) : <GradeBadge key={g} letter={g} active={false} color={gradeColor}/>)}
+          </div>
+        </div>
+
+        <div style={{ flex: 1, minHeight: 4 }}/>
+
+        {/* buttons */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4 }}>
+          {/* share → feed */}
+          <button onClick={() => history.push('/feed')} style={{ width: '100%', height: 54, border: 'none', borderRadius: 999, padding: 2, background: 'linear-gradient(135deg, #fff 0%, #3DFFA6 25%, #25d688 50%, #3DFFA6 75%, #fff 100%)', cursor: 'pointer', boxShadow: '0 0 22px rgba(61,255,166,0.65), 0 6px 18px rgba(61,255,166,0.3)' }}>
+            <div style={{ width: '100%', height: '100%', borderRadius: 999, background: 'linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(61,255,166,0.95) 45%, #25d688 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 15, color: '#0a2a18', textShadow: '0 1px 0 rgba(255,255,255,0.5)', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: 0, bottom: '50%', left: 0, right: 0, background: 'linear-gradient(180deg, rgba(255,255,255,0.5), transparent)', borderRadius: '999px 999px 0 0' }}/>
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style={{ position: 'relative', zIndex: 2 }}>
+                <path d="M12 5a2 2 0 100-4 2 2 0 000 4zM12 15a2 2 0 100-4 2 2 0 000 4zM4 10a2 2 0 100-4 2 2 0 000 4z" fill="#0a2a18"/>
+                <path d="M10.5 4L5.5 7M10.5 12L5.5 9" stroke="#0a2a18" strokeWidth="1.5"/>
+              </svg>
+              <span style={{ position: 'relative', zIndex: 2 }}>퍼블릭쇼룸에 공유</span>
+            </div>
+          </button>
+          {/* retry → paepyeong hub */}
+          <button onClick={() => history.push('/paepyeong')} style={{ width: '100%', height: 48, border: '1.5px solid rgba(255,110,175,0.5)', borderRadius: 999, background: 'linear-gradient(180deg, rgba(255,110,175,0.12), rgba(255,110,175,0.04))', cursor: 'pointer', boxShadow: '0 0 14px rgba(255,110,175,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: '"Space Grotesk", sans-serif', fontWeight: 600, fontSize: 14, color: '#fff' }}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M12 2v4h-4M2 12v-4h4" stroke="#FF6EAF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M11 5a5 5 0 00-9 1M3 9a5 5 0 009-1" stroke="#FF6EAF" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+            <span>다시 평가받기</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCREEN 03 — PUBLIC SHOWROOM FEED
+// ═══════════════════════════════════════════════════════════════
+
+function Avatar({ name, size = 46, ring = false }) {
+  const hues = [210, 340, 160, 40, 280, 20, 190];
+  const h = hues[(name.charCodeAt(0) + (name.charCodeAt(1) || 0)) % hues.length];
+  return (
+    <div style={{ width: size, height: size, borderRadius: '50%', padding: ring ? 2 : 0, background: ring ? 'linear-gradient(135deg, #3DFFA6, #25d688, #fff, #3DFFA6)' : 'transparent', flexShrink: 0 }}>
+      <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: `repeating-linear-gradient(45deg, hsl(${h}, 55%, 78%) 0px, hsl(${h}, 55%, 78%) 4px, hsl(${h}, 55%, 90%) 4px, hsl(${h}, 55%, 90%) 8px)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"JetBrains Mono", monospace', fontSize: size * 0.34, fontWeight: 700, color: `hsl(${h}, 55%, 28%)`, border: ring ? '2px solid #fff' : '1px solid rgba(0,0,0,0.08)' }}>
+        {name[0]}
+      </div>
+    </div>
+  );
+}
+
+function OOTDPlaceholder({ seed, tall = false }) {
+  const hues = [[200, 320], [340, 40], [160, 210], [20, 280], [280, 60]];
+  const [h1, h2] = hues[seed % hues.length];
+  return (
+    <div style={{ width: '100%', aspectRatio: tall ? '4 / 5' : '1 / 1', borderRadius: 14, position: 'relative', overflow: 'hidden', background: `linear-gradient(135deg, hsl(${h1}, 50%, 88%), hsl(${h2}, 45%, 78%))` }}>
+      <div style={{ position: 'absolute', inset: 0, background: `repeating-linear-gradient(45deg, rgba(255,255,255,0.2) 0px, rgba(255,255,255,0.2) 3px, transparent 3px, transparent 14px)` }}/>
+      <div style={{ position: 'absolute', bottom: 10, left: 10, padding: '3px 7px', background: 'rgba(255,255,255,0.85)', borderRadius: 4, fontFamily: '"JetBrains Mono", monospace', fontSize: 9, letterSpacing: 1, color: '#1A1A1A' }}>OOTD_{String(seed + 1).padStart(2, '0')}</div>
+    </div>
+  );
+}
+
+function ScoreBadge({ score }) {
+  const tier = score >= 80 ? '#3DFFA6' : score >= 50 ? '#FFB83D' : '#FF6EAF';
+  return (
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px 5px 7px', background: '#1A1A1A', borderRadius: 999, border: `1.5px solid ${tier}`, boxShadow: `0 0 10px ${tier}55` }}>
+      <div style={{ width: 16, height: 16, borderRadius: '50%', background: `linear-gradient(135deg, #fff, ${tier})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Press Start 2P", monospace', fontSize: 6, color: '#1A1A1A' }}>AI</div>
+      <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 10, color: tier, textShadow: `0 0 6px ${tier}88` }}>{score}</span>
+    </div>
+  );
+}
+
+function LevelChip({ title, lv }) {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 7px', background: 'linear-gradient(180deg, #fff, #F0FFF6)', border: '1px solid #3DFFA6', borderRadius: 4, fontFamily: '"Space Grotesk", sans-serif', fontSize: 10, fontWeight: 600, color: '#0a6b3e', boxShadow: '0 1px 0 rgba(61,255,166,0.3)', whiteSpace: 'nowrap' }}>
+      <span style={{ fontSize: 8 }}>✦</span>{title}<span style={{ color: '#1A1A1A' }}>·lv.{lv}</span>
+    </span>
+  );
+}
+
+function FeedCard({ post, onCardClick }) {
+  const [liked, setLiked] = useState(post.liked);
+  const [likes, setLikes] = useState(post.likes);
+  const [pop, setPop] = useState(false);
+
+  const tap = (e) => {
+    e.stopPropagation();
+    const next = !liked;
+    setLiked(next); setLikes(l => l + (next ? 1 : -1));
+    if (next) { setPop(true); setTimeout(() => setPop(false), 520); }
+  };
+
+  return (
+    <div style={{ background: '#fff', borderRadius: 18, border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 1px 0 rgba(0,0,0,0.02), 0 6px 16px rgba(0,0,0,0.04)', padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {/* header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Avatar name={post.user} size={38}/>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 14, fontWeight: 700, color: '#1A1A1A', display: 'flex', alignItems: 'center', gap: 4 }}>
+            {post.user}{post.verified && <span style={{ color: '#3DFFA6', fontSize: 12 }}>✓</span>}
+          </div>
+          <div style={{ marginTop: 2 }}><LevelChip title={post.tier} lv={post.lv}/></div>
+        </div>
+        <button onClick={e => e.stopPropagation()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#9a9a9a', fontSize: 18, lineHeight: 1 }}>⋯</button>
+      </div>
+
+      {/* image — click navigates to detail */}
+      <div onClick={onCardClick} style={{ position: 'relative', cursor: 'pointer' }}>
+        <OOTDPlaceholder seed={post.seed} tall/>
+        <div style={{ position: 'absolute', top: 10, right: 10 }}><ScoreBadge score={post.score}/></div>
+        {post.score >= 80 && <MiniSpark color="#3DFFA6" size={12} style={{ top: 6, right: -2 }}/>}
+        {/* tap hint */}
+        <div style={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', padding: '3px 10px', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', borderRadius: 999, fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.85)', whiteSpace: 'nowrap' }}>
+          탭하여 상세보기 →
+        </div>
+      </div>
+
+      {/* actions */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, paddingTop: 2 }}>
+        <button onClick={tap} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 5, fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, fontWeight: 600, color: '#1A1A1A', position: 'relative' }}>
+          <span style={{ display: 'inline-flex', transform: pop ? 'scale(1.35)' : 'scale(1)', transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M9 15.5s-5.5-3.5-5.5-8A3.5 3.5 0 019 4.5 3.5 3.5 0 0114.5 7.5c0 4.5-5.5 8-5.5 8z" fill={liked ? '#FF6EAF' : 'none'} stroke={liked ? '#FF6EAF' : '#1A1A1A'} strokeWidth="1.5" strokeLinejoin="round"/>
+            </svg>
+          </span>
+          {pop && [-30, 0, 30, 60].map((deg, i) => (
+            <span key={i} style={{ position: 'absolute', left: 9, top: 9, width: 3, height: 3, background: '#FF6EAF', borderRadius: '50%', animation: 'ppHeartBurst 0.5s ease-out forwards', transform: `rotate(${deg + 45}deg) translateY(0)`, transformOrigin: 'center' }}/>
+          ))}
+          <span style={{ fontVariantNumeric: 'tabular-nums' }}>{likes}</span>
+        </button>
+        <button onClick={e => e.stopPropagation()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 5, fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, fontWeight: 600, color: '#1A1A1A' }}>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 4.5a2 2 0 012-2h8a2 2 0 012 2v6a2 2 0 01-2 2H9l-3.5 3V12.5H5a2 2 0 01-2-2v-6z" stroke="#1A1A1A" strokeWidth="1.5" strokeLinejoin="round"/></svg>
+          <span style={{ fontVariantNumeric: 'tabular-nums' }}>{post.comments}</span>
+        </button>
+        <div style={{ flex: 1 }}/>
+        <button onClick={e => e.stopPropagation()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 2v14l5-3 5 3V2H4z" stroke="#1A1A1A" strokeWidth="1.5" strokeLinejoin="round"/></svg>
+        </button>
+      </div>
+
+      <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, lineHeight: 1.4, color: '#1A1A1A' }}>
+        <span style={{ fontWeight: 700 }}>{post.user}</span>{' '}<span>{post.caption}</span>
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: -4 }}>
+        {post.tags.map(t => <span key={t} style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, fontWeight: 600, color: '#0a6b3e', padding: '3px 8px', background: '#E8FFF2', border: '1px solid rgba(61,255,166,0.5)', borderRadius: 999 }}>#{t}</span>)}
+      </div>
+    </div>
+  );
+}
+
+function TrendCloset() {
+  const celebs = [
+    { name: '제니', hot: true }, { name: '뉴진스', hot: true }, { name: '태연', hot: false },
+    { name: '로제', hot: true }, { name: '카리나', hot: false }, { name: '민지', hot: false }, { name: '아이유', hot: false },
+  ];
+  return (
+    <div style={{ paddingTop: 12, paddingBottom: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 16px', marginBottom: 10 }}>
+        <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 15, fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>트렌드 옷장</span>
+        <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 7, color: '#0a6b3e', background: '#E8FFF2', padding: '2px 5px', borderRadius: 3, letterSpacing: 1 }}>HOT</span>
+        <div style={{ flex: 1 }}/>
+        <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: '#888', cursor: 'pointer' }}>전체보기 ›</span>
+      </div>
+      <div style={{ display: 'flex', gap: 14, overflowX: 'auto', padding: '0 16px 6px', scrollbarWidth: 'none' }}>
+        {celebs.map(c => (
+          <div key={c.name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, minWidth: 58 }}>
+            <div style={{ position: 'relative' }}>
+              <Avatar name={c.name} size={58} ring/>
+              {c.hot && <div style={{ position: 'absolute', bottom: -2, right: -2, width: 18, height: 18, borderRadius: '50%', background: '#FF6EAF', border: '2px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9 }}>🔥</div>}
+            </div>
+            <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, fontWeight: 600, color: '#1A1A1A' }}>{c.name}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PaepyeongFeed() {
+  const history = useHistory();
+  const [tab, setTab] = useState('추천');
+  const posts = [
+    { user: 'jinyhoodie', verified: true, tier: '패션 황제', lv: 5, seed: 0, score: 92, likes: 3421, comments: 87, liked: false, caption: '가을 초입엔 그냥 레이어드가 답입니다. 바람막이 + 니트 조합.', tags: ['고프코어', '개강룩', 'layered'] },
+    { user: 'minsu_fit',  verified: false, tier: '스타일러',  lv: 3, seed: 2, score: 74, likes: 862,  comments: 21, liked: true,  caption: '오늘은 전체 톤을 베이지로 통일해봤어요 🤎', tags: ['모노톤', '데일리룩'] },
+    { user: 'ddaeng_',    verified: true,  tier: '패션 스타', lv: 4, seed: 4, score: 48, likes: 204,  comments: 12, liked: false, caption: '실험적이긴 했는데 핏이 좀 아쉬워요... 다음엔 재도전.', tags: ['y2k', '실험룩'] },
+  ];
+
+  return (
+    <div style={{ width: '100%', height: '100%', background: '#FAFAFA', position: 'relative', fontFamily: '"Space Grotesk", sans-serif', display: 'flex', flexDirection: 'column', overflow: 'hidden', animation: 'ppSlideIn 0.35s ease' }}>
+      <div style={{ height: 58, flexShrink: 0 }}/>
+      {/* header */}
+      <div style={{ display: 'flex', alignItems: 'center', padding: '8px 16px 10px', background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+        <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 22, fontWeight: 800, color: '#1A1A1A', letterSpacing: -0.5, position: 'relative' }}>
+          퍼블릭쇼룸<MiniSpark color="#3DFFA6" size={10} style={{ top: -2, right: -10 }}/>
+        </div>
+        <div style={{ flex: 1 }}/>
+        <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}>
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="10" cy="10" r="6" stroke="#1A1A1A" strokeWidth="1.8"/><path d="M14.5 14.5L19 19" stroke="#1A1A1A" strokeWidth="1.8" strokeLinecap="round"/></svg>
+        </button>
+        <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, position: 'relative' }}>
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2a6 6 0 00-6 6v4l-2 3h16l-2-3V8a6 6 0 00-6-6zM9 19a2 2 0 004 0" stroke="#1A1A1A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <div style={{ position: 'absolute', top: 4, right: 4, width: 8, height: 8, borderRadius: '50%', background: '#FF6EAF', border: '1.5px solid #fff' }}/>
+        </button>
+      </div>
+      {/* tabs */}
+      <div style={{ display: 'flex', padding: '0 16px', borderBottom: '1px solid rgba(0,0,0,0.06)', background: '#fff' }}>
+        {['추천', '팔로잉'].map(t => {
+          const isOn = t === tab;
+          return (
+            <button key={t} onClick={() => setTab(t)} style={{ padding: '14px 18px', background: 'none', border: 'none', cursor: 'pointer', position: 'relative', fontFamily: '"Space Grotesk", sans-serif', fontSize: 16, fontWeight: isOn ? 700 : 500, color: isOn ? '#1A1A1A' : '#9a9a9a', letterSpacing: -0.3 }}>
+              {t}
+              {isOn && <div style={{ position: 'absolute', bottom: -1, left: 12, right: 12, height: 3, borderRadius: 3, background: '#1A1A1A' }}/>}
+            </button>
+          );
+        })}
+      </div>
+      {/* scroll area */}
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: '#FAFAFA' }}>
+        <div style={{ background: '#fff' }}><TrendCloset/></div>
+        <div style={{ padding: '14px 14px 100px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {posts.map((p, i) => <FeedCard key={i} post={p} onCardClick={() => history.push('/detail')}/>)}
+        </div>
+      </div>
+      {/* bottom tabs */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, borderTop: '1px solid rgba(0,0,0,0.06)', background: '#fff', paddingBottom: 20, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-around', paddingTop: 8 }}>
+        {[
+          { key: '퍼블릭쇼룸', icon: (c) => <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 9l8-6 8 6v10a1 1 0 01-1 1h-4v-6H8v6H4a1 1 0 01-1-1V9z" stroke={c} strokeWidth="1.7" strokeLinejoin="round" fill={c === '#1A1A1A' ? '#E8FFF2' : 'none'}/></svg> },
+          { key: '패평', primary: true, icon: (c) => <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="10" fill={c}/><path d="M8 13l3.5 3.5L18 10" stroke="#1A1A1A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg> },
+          { key: '퍼스널쇼룸', icon: (c) => <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="8" r="4" stroke={c} strokeWidth="1.7"/><path d="M3 20c1.5-4 4.5-6 8-6s6.5 2 8 6" stroke={c} strokeWidth="1.7" strokeLinecap="round"/></svg> },
+        ].map(t => {
+          const isOn = t.key === '퍼블릭쇼룸';
+          const color = t.primary ? '#3DFFA6' : (isOn ? '#1A1A1A' : '#b8b8b8');
+          return (
+            <button key={t.key} style={{ flex: 1, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '4px 4px' }}>
+              {t.primary ? <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #fff 0%, #3DFFA6 60%, #25d688 100%)', boxShadow: '0 4px 14px rgba(61,255,166,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: -16, border: '3px solid #fff' }}>{t.icon('#1A1A1A')}</div> : t.icon(color)}
+              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 10.5, fontWeight: isOn ? 700 : 500, color: isOn ? '#1A1A1A' : '#9a9a9a', marginTop: t.primary ? 2 : 0 }}>{t.key}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCREEN 04 — CODI DETAIL + A/B VOTE
+// ═══════════════════════════════════════════════════════════════
+
+function DSpark({ size = 10, color = '#3DFFA6', style = {} }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 10 10" style={{ position: 'absolute', pointerEvents: 'none', ...style }}>
+      <path d="M5 0 L6 4 L10 5 L6 6 L5 10 L4 6 L0 5 L4 4 Z" fill={color}/>
+    </svg>
+  );
+}
+
+function OutfitImg({ seed, label, winning }) {
+  const palettes = [[['#2a1f3d', '#4a2f6d'], '#ff6eaf'], [['#0d3d2e', '#1a6b52'], '#3dffa6']];
+  const [[c1, c2], accent] = palettes[seed % palettes.length];
+  return (
+    <div style={{ width: '100%', aspectRatio: '3 / 4.2', borderRadius: 12, position: 'relative', overflow: 'hidden', background: `linear-gradient(160deg, ${c1}, ${c2})`, boxShadow: winning ? `0 0 0 2px ${accent}, 0 0 24px ${accent}66` : 'inset 0 0 0 1px rgba(255,255,255,0.08)', transition: 'box-shadow 0.4s ease' }}>
+      <div style={{ position: 'absolute', inset: 0, background: `repeating-linear-gradient(45deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 2px, transparent 2px, transparent 12px)` }}/>
+      <div style={{ position: 'absolute', left: '22%', right: '22%', top: '18%', bottom: '14%', background: `repeating-linear-gradient(135deg, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.12) 4px, rgba(0,0,0,0.12) 4px, rgba(0,0,0,0.12) 10px)`, borderRadius: 8, border: '1px dashed rgba(255,255,255,0.2)' }}/>
+      <div style={{ position: 'absolute', top: 8, left: 8, width: 28, height: 28, borderRadius: 6, background: winning ? accent : 'rgba(0,0,0,0.55)', border: winning ? 'none' : `1.5px solid ${accent}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Press Start 2P", monospace', fontSize: 11, color: winning ? '#1A1A1A' : accent, boxShadow: winning ? `0 0 10px ${accent}` : 'none' }}>{label}</div>
+      <div style={{ position: 'absolute', bottom: 6, right: 8, fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: 'rgba(255,255,255,0.55)', letterSpacing: 1 }}>LOOK_{label}</div>
+    </div>
+  );
+}
+
+function ProductChip({ brand, name, hue }) {
+  return (
+    <div style={{ flexShrink: 0, width: 108, display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ width: 108, height: 108, borderRadius: 10, background: `linear-gradient(135deg, hsl(${hue},40%,28%), hsl(${hue + 30},45%,18%))`, border: '1px solid rgba(255,255,255,0.08)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: '25%', background: `repeating-linear-gradient(90deg, rgba(255,255,255,0.15) 0 2px, transparent 2px 6px)`, borderRadius: 4 }}/>
+        <div style={{ position: 'absolute', bottom: 4, left: 6, fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: 'rgba(255,255,255,0.6)', letterSpacing: 0.5 }}>IMG</div>
+      </div>
+      <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 7, color: '#3DFFA6', letterSpacing: 1 }}>{brand}</div>
+      <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: '#fff', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</div>
+    </div>
+  );
+}
+
+function CommentRow({ c }) {
+  const [liked, setLiked] = useState(c.liked);
+  const [likes, setLikes] = useState(c.likes);
+  return (
+    <div style={{ display: 'flex', gap: 10, padding: '10px 0' }}>
+      <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: `repeating-linear-gradient(45deg, hsl(${c.hue},50%,60%) 0 3px, hsl(${c.hue},50%,75%) 3px 6px)`, border: '1px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"JetBrains Mono", monospace', fontSize: 12, fontWeight: 700, color: '#1A1A1A' }}>{c.user[0]}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
+          <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, fontWeight: 700, color: '#fff' }}>{c.user}</span>
+          {c.side && <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 7, letterSpacing: 1, padding: '2px 5px', borderRadius: 3, background: c.side === 'A' ? 'rgba(255,110,175,0.15)' : 'rgba(61,255,166,0.15)', color: c.side === 'A' ? '#FF6EAF' : '#3DFFA6', border: `1px solid ${c.side === 'A' ? 'rgba(255,110,175,0.4)' : 'rgba(61,255,166,0.4)'}` }}>VOTED {c.side}</span>}
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{c.time}</span>
+        </div>
+        <div style={{ marginTop: 3, fontFamily: '"Space Grotesk", sans-serif', fontSize: 13.5, lineHeight: 1.45, color: 'rgba(255,255,255,0.88)' }}>{c.text}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 5 }}>
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>답글</span>
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>· 좋아요 {likes}</span>
+        </div>
+      </div>
+      <button onClick={() => { const n = !liked; setLiked(n); setLikes(l => l + (n ? 1 : -1)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, alignSelf: 'flex-start' }}>
+        <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+          <path d="M9 15.5s-5.5-3.5-5.5-8A3.5 3.5 0 019 4.5 3.5 3.5 0 0114.5 7.5c0 4.5-5.5 8-5.5 8z" fill={liked ? '#FF6EAF' : 'none'} stroke={liked ? '#FF6EAF' : 'rgba(255,255,255,0.6)'} strokeWidth="1.5" strokeLinejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+function PaepyeongDetail() {
+  const history = useHistory();
+  const [userVote, setUserVote] = useState(null);
+  const [pctA, setPctA] = useState(37);
+  const [following, setFollowing] = useState(false);
+
+  const baseTotal = 2846, baseA = Math.round(baseTotal * 0.37);
+  useEffect(() => {
+    const newA = userVote === 'A' ? baseA + 1 : baseA;
+    const newTotal = userVote ? baseTotal + 1 : baseTotal;
+    setPctA((newA / newTotal) * 100);
+  }, [userVote]);
+
+  const comments = [
+    { user: 'soy_mini',   time: '2m',  text: '무조건 B ㄱㄱ 첫 소개팅이면 깔끔한 게 국룰', likes: 124, liked: false, side: 'B', hue: 180 },
+    { user: 'hayeon.k',   time: '5m',  text: 'A가 더 풋풋해요 💕 근데 신발만 바꾸면 완벽',   likes: 88,  liked: true,  side: 'A', hue: 330 },
+    { user: 'lookbook_',  time: '8m',  text: '솔직히 둘 다 별로… 아예 톤 다운된 세 번째 안 있어요?', likes: 42, liked: false, side: null, hue: 40 },
+    { user: 'jinyoung12', time: '12m', text: 'B인데 상의만 살짝 루즈한 걸로!!',            likes: 67,  liked: false, side: 'B', hue: 210 },
+    { user: '_yuri.s',    time: '20m', text: 'A 머리스타일이랑 잘 어울려요',              likes: 31,  liked: false, side: 'A', hue: 280 },
+  ];
+  const products = [
+    { brand: 'MARITHÉ', name: 'Classic Logo Tee',  hue: 340 },
+    { brand: 'LEMAIRE', name: 'Soft Denim Pants',  hue: 200 },
+    { brand: 'SALOMON', name: 'XT-6 Sneakers',     hue: 40  },
+    { brand: 'ADER',    name: 'Cable Knit Vest',   hue: 160 },
+    { brand: 'COS',     name: 'Wide Trousers',     hue: 280 },
+  ];
+
+  return (
+    <div style={{ width: '100%', height: '100%', background: '#1A1A1A', color: '#fff', fontFamily: '"Space Grotesk", sans-serif', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative', animation: 'ppSlideIn 0.35s ease' }}>
+      <div style={{ position: 'absolute', top: '-10%', left: '-20%', width: '60%', height: '40%', background: 'radial-gradient(circle, rgba(255,110,175,0.1) 0%, transparent 60%)', pointerEvents: 'none' }}/>
+      <div style={{ position: 'absolute', top: '-5%', right: '-20%', width: '60%', height: '40%', background: 'radial-gradient(circle, rgba(61,255,166,0.1) 0%, transparent 60%)', pointerEvents: 'none' }}/>
+      <div style={{ height: 58, flexShrink: 0 }}/>
+
+      {/* header */}
+      <div style={{ padding: '6px 14px 10px', display: 'flex', alignItems: 'center', gap: 10, position: 'relative', zIndex: 2, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <button onClick={() => history.goBack()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M14 4l-7 7 7 7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </button>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #ff6eaf, #ffb4d5)', border: '2px solid #3DFFA6', boxShadow: '0 0 10px rgba(61,255,166,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"JetBrains Mono", monospace', fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>y</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 15, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: 4 }}>
+            yuna.04<span style={{ color: '#3DFFA6', fontSize: 12 }}>✓</span>
+          </div>
+          <div style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10.5, color: 'rgba(255,255,255,0.55)', letterSpacing: 0.3 }}>157cm · 40kg · ♀ · MZ</div>
+        </div>
+        <button onClick={() => setFollowing(f => !f)} style={{ padding: '7px 14px', borderRadius: 999, background: following ? 'transparent' : 'linear-gradient(135deg, #fff, #3DFFA6 60%, #25d688)', border: following ? '1.5px solid rgba(255,255,255,0.25)' : 'none', color: following ? 'rgba(255,255,255,0.7)' : '#0a2a18', fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 12, cursor: 'pointer', boxShadow: following ? 'none' : '0 0 12px rgba(61,255,166,0.4)', letterSpacing: 0.2 }}>
+          {following ? '팔로잉' : '+ 팔로우'}
+        </button>
+      </div>
+
+      {/* scroll body */}
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '14px 14px 90px', position: 'relative', zIndex: 2 }}>
+        <h2 style={{ margin: 0, fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 19, lineHeight: 1.3, color: '#fff', letterSpacing: -0.3 }}>내일 첫 소개팅인데 코디 ㅊㅊ좀 🥺</h2>
+        <p style={{ margin: '6px 0 0', fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, lineHeight: 1.5, color: 'rgba(255,255,255,0.65)' }}>
+          평소엔 오버핏만 입는데 소개팅이라 걱정… 둘 중에 뭐가 나을까요?<br/>장소는 홍대 브런치 카페라고 합니다 🫠
+        </p>
+
+        {/* A/B vote */}
+        <div style={{ marginTop: 14, position: 'relative', display: 'flex', gap: 10, alignItems: 'stretch' }}>
+          <button onClick={() => setUserVote('A')} style={{ flex: 1, padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+            <OutfitImg seed={0} label="A" winning={userVote === 'A' || (!userVote && pctA > 50)}/>
+          </button>
+          <button onClick={() => setUserVote('B')} style={{ flex: 1, padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+            <OutfitImg seed={1} label="B" winning={userVote === 'B' || (!userVote && pctA <= 50)}/>
+          </button>
+          <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', width: 44, height: 44, borderRadius: '50%', background: 'radial-gradient(circle at 30% 30%, #fff 0%, #1A1A1A 60%)', border: '2px solid #fff', boxShadow: '0 0 0 2px #1A1A1A, 0 0 14px rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Press Start 2P", monospace', fontSize: 12, color: '#1A1A1A', letterSpacing: 1, zIndex: 3 }}>VS</div>
+          <DSpark size={12} color="#FF6EAF" style={{ top: -4, left: '25%' }}/>
+          <DSpark size={10} color="#3DFFA6" style={{ top: -4, right: '25%' }}/>
+        </div>
+
+        {/* vote bar */}
+        <div style={{ marginTop: 14 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', fontFamily: '"Press Start 2P", monospace', fontSize: 13 }}>
+              <div style={{ width: `${pctA}%`, color: userVote === 'A' ? '#FF6EAF' : 'rgba(255,110,175,0.75)', textShadow: userVote === 'A' ? '0 0 10px #FF6EAF' : 'none', transition: 'all 0.6s ease', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 10 }}>A</span><span>{Math.round(pctA)}%</span>
+              </div>
+              <div style={{ flex: 1 }}/>
+              <div style={{ color: userVote === 'B' ? '#3DFFA6' : 'rgba(61,255,166,0.75)', textShadow: userVote === 'B' ? '0 0 10px #3DFFA6' : 'none', transition: 'all 0.6s ease', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span>{Math.round(100 - pctA)}%</span><span style={{ fontSize: 10 }}>B</span>
+              </div>
+            </div>
+            <div style={{ height: 18, borderRadius: 4, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)', position: 'relative', overflow: 'hidden', display: 'flex' }}>
+              <div style={{ width: `${pctA}%`, background: 'linear-gradient(180deg, #ffb4d5 0%, #FF6EAF 40%, #c13e7f 100%)', transition: 'width 0.8s cubic-bezier(0.22, 1, 0.36, 1)', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(to bottom, rgba(255,255,255,0.35), transparent)' }}/>
+              </div>
+              <div style={{ width: 2, background: '#1A1A1A' }}/>
+              <div style={{ flex: 1, background: 'linear-gradient(180deg, #c0ffe0 0%, #3DFFA6 40%, #1a9e68 100%)', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(to bottom, rgba(255,255,255,0.35), transparent)' }}/>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+              <span>총 2,847 votes</span>
+              <span>{userVote ? `✓ ${userVote} 투표 완료` : '탭하여 투표'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* products */}
+        <div style={{ marginTop: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: '#3DFFA6', letterSpacing: 1.5, textShadow: '0 0 6px rgba(61,255,166,0.5)' }}>★ USED PRODUCTS</span>
+            <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(61,255,166,0.4), transparent)' }}/>
+            <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>{products.length}</span>
+          </div>
+          <div style={{ display: 'flex', gap: 10, overflowX: 'auto', margin: '0 -14px', padding: '0 14px 6px', scrollbarWidth: 'none' }}>
+            {products.map((p, i) => <ProductChip key={i} {...p}/>)}
+          </div>
+        </div>
+
+        {/* comments */}
+        <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px dashed rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 14, fontWeight: 700, color: '#fff' }}>댓글</span>
+          <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: '#FF6EAF', textShadow: '0 0 6px rgba(255,110,175,0.5)' }}>{comments.length}</span>
+          <div style={{ flex: 1 }}/>
+          <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>인기순 ▾</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {comments.map((c, i) => (
+            <div key={i} style={{ borderBottom: i < comments.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+              <CommentRow c={c}/>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* comment input */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '10px 14px 26px', background: 'linear-gradient(180deg, rgba(26,26,26,0.6), #1A1A1A 30%)', backdropFilter: 'blur(10px)', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 10, zIndex: 4 }}>
+        <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg, #3DFFA6, #25d688)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"JetBrains Mono", monospace', fontSize: 12, fontWeight: 700, color: '#0a2a18' }}>m</div>
+        <div style={{ flex: 1, height: 38, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 999, display: 'flex', alignItems: 'center', padding: '0 14px', fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>코디 의견을 남겨주세요…</div>
+        <button style={{ width: 38, height: 38, borderRadius: '50%', border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #fff, #3DFFA6 50%, #25d688)', boxShadow: '0 0 12px rgba(61,255,166,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8l12-6-4 14-3-6-5-2z" fill="#0a2a18"/></svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SHARED BOTTOM NAV
+// ═══════════════════════════════════════════════════════════════
+
+function SharedBottomNav() {
+  const history = useHistory();
+  const location = useLocation();
+  const path = location.pathname;
+  const isLight = path === '/feed';
+
+  const bg = isLight ? 'rgba(255,255,255,0.92)' : 'rgba(20,20,20,0.96)';
+  const border = isLight ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(255,255,255,0.08)';
+  const inactiveColor = isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.35)';
+  const activeColor = '#3DFFA6';
+  const pinkColor = '#FF6EAF';
+
+  const tabs = [
+    {
+      path: '/feed',
+      label: '퍼블릭쇼룸',
+      icon: (active) => (
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="2" y="8" width="18" height="12" rx="2" stroke={active ? activeColor : inactiveColor} strokeWidth="1.5"/>
+          <path d="M6 8V6a5 5 0 0110 0v2" stroke={active ? activeColor : inactiveColor} strokeWidth="1.5" strokeLinecap="round"/>
+          <circle cx="11" cy="14" r="2" fill={active ? activeColor : inactiveColor}/>
+        </svg>
+      ),
+    },
+    {
+      path: '/paepyeong',
+      label: '패평',
+      icon: (active) => (
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+          <circle cx="13" cy="13" r="11" fill={active ? activeColor : 'transparent'} stroke={active ? activeColor : pinkColor} strokeWidth="1.5"/>
+          <path d="M8 13h10M13 8v10" stroke={active ? '#0a2a18' : pinkColor} strokeWidth="2" strokeLinecap="round"/>
+          <circle cx="13" cy="13" r="3" fill={active ? '#0a2a18' : pinkColor}/>
+        </svg>
+      ),
+    },
+    {
+      path: '/personal',
+      label: '퍼스널쇼룸',
+      icon: (active) => (
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="7" r="4" stroke={active ? activeColor : inactiveColor} strokeWidth="1.5"/>
+          <path d="M3 20c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke={active ? activeColor : inactiveColor} strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      ),
+    },
+  ];
+
+  return (
+    <div style={{
+      position: 'absolute', bottom: 0, left: 0, right: 0, height: 68,
+      background: bg, borderTop: border, backdropFilter: 'blur(12px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-around',
+      padding: '0 8px 8px', zIndex: 100,
+    }}>
+      {tabs.map(tab => {
+        const active = path === tab.path || (tab.path === '/feed' && path === '/detail');
+        const isCenter = tab.path === '/paepyeong';
+        return (
+          <button key={tab.path} onClick={() => history.push(tab.path)}
+            style={{
+              flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+              background: 'none', border: 'none', cursor: 'pointer', padding: '6px 0',
+              position: 'relative',
+            }}>
+            {isCenter && (
+              <div style={{
+                position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)',
+                width: 52, height: 52, borderRadius: '50%',
+                background: active ? activeColor : 'linear-gradient(135deg, #FF6EAF, #ff3d8a)',
+                boxShadow: active ? '0 0 20px rgba(61,255,166,0.7)' : '0 0 16px rgba(255,110,175,0.6)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {tab.icon(active)}
+              </div>
+            )}
+            {!isCenter && tab.icon(active)}
+            {!isCenter && (
+              <span style={{
+                fontFamily: '"Press Start 2P", monospace', fontSize: 7,
+                color: active ? activeColor : inactiveColor,
+                lineHeight: 1.2, letterSpacing: '-0.3px',
+              }}>{tab.label}</span>
+            )}
+            {isCenter && <div style={{ height: 34 }}/>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAEPYEONG HUB  (/paepyeong)
+// ═══════════════════════════════════════════════════════════════
+
+const WARDROBE_ITEMS = [
+  { id:1,  brand:'MINJUKIM',  name:'플라워 블라우스',      cat:'상의',  hue:'#f9c8e0' },
+  { id:2,  brand:'ADER ERROR',name:'오버 스웨트셔츠',      cat:'상의',  hue:'#c8d9f9' },
+  { id:3,  brand:'LOW CLASSIC',name:'슬리브리스 니트',     cat:'상의',  hue:'#f9e5c8' },
+  { id:4,  brand:'87MM',      name:'스트라이프 셔츠',      cat:'상의',  hue:'#d2c8f9' },
+  { id:5,  brand:'JUUN.J',    name:'와이드 트라우저',      cat:'하의',  hue:'#c8f9d2' },
+  { id:6,  brand:'MINJUKIM',  name:'미니 플리츠 스커트',   cat:'하의',  hue:'#f9c8c8' },
+  { id:7,  brand:'LOW CLASSIC',name:'테이퍼드 슬랙스',     cat:'하의',  hue:'#e8f9c8' },
+  { id:8,  brand:'87MM',      name:'데님 와이드 팬츠',     cat:'하의',  hue:'#c8e8f9' },
+  { id:9,  brand:'ADER ERROR',name:'오버 블레이저',        cat:'아우터', hue:'#f9f0c8' },
+  { id:10, brand:'JUUN.J',    name:'더블 브레스티드 코트', cat:'아우터', hue:'#e8c8f9' },
+  { id:11, brand:'LOW CLASSIC',name:'크롭 퍼 자켓',        cat:'아우터', hue:'#c8f9f5' },
+  { id:12, brand:'MINJUKIM',  name:'메리제인 플랫슈즈',    cat:'신발',  hue:'#f9d5c8' },
+  { id:13, brand:'87MM',      name:'청키 로퍼',            cat:'신발',  hue:'#d0f9c8' },
+  { id:14, brand:'JUUN.J',    name:'스퀘어토 뮬',          cat:'신발',  hue:'#f9c8e8' },
+  { id:15, brand:'ADER ERROR',name:'버킷햇',               cat:'액세서리', hue:'#c8d2f9' },
+];
+
+function CategoryStrip({ cats, active, onSelect, dark }) {
+  const textColor = dark ? '#fff' : '#111';
+  const mutedColor = dark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)';
+  return (
+    <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', padding: '0 0 4px' }}>
+      {cats.map(c => (
+        <button key={c} onClick={() => onSelect(c)}
+          style={{
+            flexShrink: 0, padding: '5px 13px', borderRadius: 999,
+            border: active === c ? '1.5px solid #3DFFA6' : `1.5px solid ${dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'}`,
+            background: active === c ? 'rgba(61,255,166,0.12)' : 'transparent',
+            fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, fontWeight: 600,
+            color: active === c ? '#3DFFA6' : mutedColor, cursor: 'pointer',
+          }}>
+          {c}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ClothingThumb({ item, selected, onToggle }) {
+  return (
+    <div onClick={onToggle} style={{
+      position: 'relative', aspectRatio: '3/4', borderRadius: 10, overflow: 'hidden',
+      border: selected ? '2px solid #3DFFA6' : '2px solid transparent',
+      cursor: 'pointer', background: item.hue,
+      boxShadow: selected ? '0 0 12px rgba(61,255,166,0.5)' : 'none',
+      transition: 'all 0.15s',
+    }}>
+      {/* cloth visual */}
+      <div style={{
+        position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', gap: 4,
+      }}>
+        <div style={{
+          width: '55%', height: '60%', borderRadius: 6, opacity: 0.45,
+          background: 'rgba(0,0,0,0.15)',
+        }}/>
+        <div style={{
+          fontFamily: '"Space Grotesk", sans-serif', fontSize: 8, fontWeight: 700,
+          color: 'rgba(0,0,0,0.4)', textAlign: 'center', padding: '0 4px', letterSpacing: 0.2,
+        }}>{item.brand}</div>
+        <div style={{
+          fontFamily: '"Space Grotesk", sans-serif', fontSize: 7,
+          color: 'rgba(0,0,0,0.35)', textAlign: 'center', padding: '0 4px',
+        }}>{item.name}</div>
+      </div>
+      {/* check overlay */}
+      {selected && (
+        <div style={{
+          position: 'absolute', inset: 0, background: 'rgba(61,255,166,0.18)',
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end', padding: 5,
+        }}>
+          <div style={{
+            width: 18, height: 18, borderRadius: '50%', background: '#3DFFA6',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M2 5l2.5 2.5L8 3" stroke="#0a2a18" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function parseProductName(fullName) {
+  // "브랜드명(ENGLISH) 상품명 - 사이즈 & 후기 | 무신사" 형태에서 파싱
+  const parenEnd = fullName.indexOf(')');
+  if (parenEnd === -1) return { brand: fullName, product: '' };
+  const brand = fullName.slice(0, parenEnd + 1).trim();
+  const rest = fullName.slice(parenEnd + 1).trim();
+  const product = rest.replace(/\s*-\s*사이즈.*$/, '').trim();
+  return { brand, product };
+}
+
+function ProductCard({ item, selected, onToggle }) {
+  const [imgError, setImgError] = useState(false);
+  const { brand, product } = parseProductName(item.name);
+  return (
+    <div onClick={onToggle} style={{
+      position: 'relative', borderRadius: 8, overflow: 'hidden',
+      border: selected ? '2px solid #3DFFA6' : '2px solid transparent',
+      cursor: 'pointer', background: '#fff',
+      boxShadow: selected ? '0 0 10px rgba(61,255,166,0.5)' : 'none',
+      transition: 'all 0.15s',
+    }}>
+      <div style={{ position: 'relative', paddingTop: '100%', background: '#f5f5f5' }}>
+        {!imgError ? (
+          <img
+            src={item.imageUrl}
+            alt={item.name}
+            onError={() => setImgError(true)}
+            style={{
+              position: 'absolute', inset: 0, width: '100%', height: '100%',
+              objectFit: 'cover',
+            }}
+          />
+        ) : (
+          <div style={{
+            position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
+            justifyContent: 'center', background: '#ececec',
+          }}>
+            <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+              <rect x="4" y="6" width="20" height="16" rx="2" stroke="#bbb" strokeWidth="1.5"/>
+              <circle cx="10" cy="12" r="2" fill="#bbb"/>
+              <path d="M4 19l6-4 4 3 5-5 5 4" stroke="#bbb" strokeWidth="1.5" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        )}
+      </div>
+      <div style={{ padding: '4px 5px 6px', background: '#1a1a1a' }}>
+        <div style={{
+          fontFamily: '"Space Grotesk", sans-serif', fontSize: 9, fontWeight: 700,
+          color: '#3DFFA6', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          lineHeight: 1.3,
+        }}>
+          {brand}
+        </div>
+        <div style={{
+          fontFamily: '"Space Grotesk", sans-serif', fontSize: 8, fontWeight: 400,
+          color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          lineHeight: 1.3, opacity: 0.75,
+        }}>
+          {product}
+        </div>
+      </div>
+      {selected && (
+        <div style={{
+          position: 'absolute', inset: 0, background: 'rgba(61,255,166,0.18)',
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end', padding: 4,
+          pointerEvents: 'none',
+        }}>
+          <div style={{
+            width: 18, height: 18, borderRadius: '50%', background: '#3DFFA6',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M2 5l2.5 2.5L8 3" stroke="#0a2a18" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function OotdUploadPanel({ onEvaluate }) {
+  const [uploaded, setUploaded] = useState(false);
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, padding: '0 20px' }}>
+      <p style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: 0 }}>
+        오늘의 OOTD를 업로드하고 AI 패션 평가를 받아보세요
+      </p>
+      {/* portrait slot */}
+      <div onClick={() => setUploaded(true)}
+        style={{
+          flex: 1, borderRadius: 16, cursor: 'pointer', overflow: 'hidden',
+          border: uploaded ? '2px solid #3DFFA6' : '2px dashed rgba(61,255,166,0.35)',
+          background: uploaded ? 'rgba(61,255,166,0.06)' : 'rgba(255,255,255,0.03)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14,
+          position: 'relative', boxShadow: uploaded ? '0 0 24px rgba(61,255,166,0.2)' : 'none',
+          transition: 'all 0.2s',
+        }}>
+        {uploaded ? (
+          <>
+            {/* Simulated uploaded photo with gradient bg */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(160deg, #2a1a3e 0%, #1a2e3e 40%, #1a1a1a 100%)',
+            }}/>
+            {/* silhouette figure */}
+            <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
+              <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.15)' }}/>
+              <div style={{
+                width: 70, height: 90, borderRadius: '12px 12px 0 0',
+                background: 'linear-gradient(180deg, rgba(255,110,175,0.4), rgba(61,255,166,0.2))',
+                marginTop: -8,
+              }}/>
+              <div style={{
+                width: 80, height: 50, borderRadius: '0 0 8px 8px',
+                background: 'rgba(255,255,255,0.1)',
+              }}/>
+            </div>
+            <div style={{
+              position: 'absolute', bottom: 14, left: '50%', transform: 'translateX(-50%)',
+              background: 'rgba(61,255,166,0.85)', borderRadius: 999, padding: '4px 14px',
+              fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: '#0a2a18',
+              whiteSpace: 'nowrap',
+            }}>OOTD 업로드됨 ✓</div>
+          </>
+        ) : (
+          <>
+            <div style={{
+              width: 56, height: 56, borderRadius: '50%',
+              border: '2px dashed rgba(61,255,166,0.4)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 5v14M5 12h14" stroke="#3DFFA6" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: '#3DFFA6', marginBottom: 6 }}>OOTD 사진 업로드</div>
+              <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>탭하여 사진 선택</div>
+            </div>
+          </>
+        )}
+      </div>
+      <div style={{
+        padding: '10px 16px', borderRadius: 12,
+        background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+        display: 'flex', gap: 10, alignItems: 'center',
+      }}>
+        <span style={{ fontSize: 16 }}>💡</span>
+        <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>
+          전신이 나오고 조명이 밝은 사진일수록<br/>정확한 평가가 가능해요
+        </span>
+      </div>
+      <div style={{ position: 'absolute', bottom: 68, left: 0, right: 0, padding: '16px 20px 20px',
+        background: 'linear-gradient(180deg, transparent 0%, rgba(26,26,26,0.9) 40%, #1A1A1A 70%)' }}>
+        <button onClick={onEvaluate}
+          style={{
+            width: '100%', height: 50, borderRadius: 14, border: 'none', cursor: 'pointer',
+            background: uploaded ? 'linear-gradient(135deg, #3DFFA6, #25d688)' : 'rgba(255,255,255,0.08)',
+            fontFamily: '"Press Start 2P", monospace', fontSize: 11,
+            color: uploaded ? '#0a2a18' : 'rgba(255,255,255,0.25)',
+            boxShadow: uploaded ? '0 0 20px rgba(61,255,166,0.5)' : 'none',
+            transition: 'all 0.2s',
+          }}>
+          {uploaded ? 'AI 평가 받기 ▸' : '사진을 먼저 업로드하세요'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function WardrobeSelectPanel({ onEvaluate }) {
+  const [activeCat, setActiveCat] = useState('전체');
+  const [selected, setSelected] = useState([]);
+  const cats = ['전체', '상의', '아우터', '바지', '원피스·스커트', '신발', '가방', '소품'];
+  const filtered = activeCat === '전체' ? dummyProducts : dummyProducts.filter(i => i.category === activeCat);
+
+  const toggle = (id) => setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
+
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, overflow: 'hidden' }}>
+      <div style={{ padding: '0 20px' }}>
+        <CategoryStrip cats={cats} active={activeCat} onSelect={setActiveCat} dark={true}/>
+      </div>
+      <div style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none', padding: '0 20px', paddingBottom: 110 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+          {filtered.map(item => (
+            <ProductCard key={item.id} item={item}
+              selected={selected.includes(item.id)}
+              onToggle={() => toggle(item.id)}/>
+          ))}
+        </div>
+        {filtered.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '40px 0', fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>
+            아직 등록된 옷이 없어요
+          </div>
+        )}
+      </div>
+      <div style={{ position: 'absolute', bottom: 68, left: 0, right: 0, padding: '16px 20px 20px',
+        background: 'linear-gradient(180deg, transparent 0%, rgba(26,26,26,0.9) 40%, #1A1A1A 70%)' }}>
+        {selected.length > 0 && (
+          <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: '#FF6EAF' }}>{selected.length}개 선택됨</span>
+            <button onClick={() => setSelected([])}
+              style={{ background: 'none', border: '1px solid rgba(255,110,175,0.3)', borderRadius: 999, padding: '3px 10px',
+                fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(255,110,175,0.7)', cursor: 'pointer' }}>
+              초기화
+            </button>
+          </div>
+        )}
+        <button onClick={onEvaluate}
+          style={{
+            width: '100%', height: 50, borderRadius: 14, border: 'none', cursor: 'pointer',
+            background: selected.length > 0 ? 'linear-gradient(135deg, #3DFFA6, #25d688)' : 'rgba(255,255,255,0.08)',
+            fontFamily: '"Press Start 2P", monospace', fontSize: 11,
+            color: selected.length > 0 ? '#0a2a18' : 'rgba(255,255,255,0.25)',
+            boxShadow: selected.length > 0 ? '0 0 20px rgba(61,255,166,0.5)' : 'none',
+            transition: 'all 0.2s',
+          }}>
+          {selected.length > 0 ? `코디 평가하기 (${selected.length}개) ▸` : '아이템을 선택하세요'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PaepyeongHub() {
+  const history = useHistory();
+  const [mode, setMode] = useState('ootd'); // 'ootd' | 'wardrobe'
+
+  const handleEvaluate = () => history.push('/result');
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, background: '#1A1A1A',
+      display: 'flex', flexDirection: 'column', overflow: 'hidden',
+    }}>
+      {/* header */}
+      <div style={{ padding: '52px 20px 16px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+          <div>
+            <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 16, color: '#3DFFA6',
+              textShadow: '0 0 12px rgba(61,255,166,0.5)', letterSpacing: 1 }}>패평</span>
+            <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: 'rgba(255,255,255,0.4)', marginLeft: 10 }}>HUB</span>
+          </div>
+          <Sparkle size={18} color="#FF6EAF" delay={0}/>
+        </div>
+        <p style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0 }}>
+          AI가 당신의 패션을 평가합니다
+        </p>
+      </div>
+
+      {/* mode tabs */}
+      <div style={{ padding: '0 20px 16px', flexShrink: 0 }}>
+        <div style={{
+          display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: 12,
+          border: '1px solid rgba(255,255,255,0.08)', padding: 4, gap: 4,
+        }}>
+          {[{ key: 'ootd', label: '📸 OOTD 업로드' }, { key: 'wardrobe', label: '👗 디지털 옷장' }].map(t => (
+            <button key={t.key} onClick={() => setMode(t.key)}
+              style={{
+                flex: 1, height: 38, borderRadius: 9, border: 'none', cursor: 'pointer',
+                background: mode === t.key ? 'rgba(61,255,166,0.15)' : 'transparent',
+                fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, fontWeight: 700,
+                color: mode === t.key ? '#3DFFA6' : 'rgba(255,255,255,0.4)',
+                transition: 'all 0.2s',
+              }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* panel */}
+      <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {mode === 'ootd'
+          ? <OotdUploadPanel onEvaluate={handleEvaluate}/>
+          : <WardrobeSelectPanel onEvaluate={handleEvaluate}/>
+        }
+      </div>
+
+      {/* bottom nav */}
+      <SharedBottomNav/>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PUBLIC SHOWROOM  (/feed)  — rebuilt
+// ═══════════════════════════════════════════════════════════════
+
+const CLOSET_USERS = [
+  { handle: '@minjee_wears', bio: '미니멀 페미닌 | 로우클래식 애호가', items: 128, followers: '2.4k', hue: '#f9c8e0' },
+  { handle: '@ader.life',    bio: '스트릿 + 하이패션 믹스 | 에더에러', items: 204, followers: '5.1k', hue: '#c8d9f9' },
+  { handle: '@juunj.fan',    bio: '젠더리스 룩 | 준지 컬렉터',         items: 87,  followers: '1.8k', hue: '#d2c8f9' },
+  { handle: '@87mm.daily',   bio: '스트릿 | 87MM 위주 데일리',          items: 156, followers: '3.3k', hue: '#c8f9d2' },
+];
+
+// ── Trend person card (세로형 둥근 실루엣 카드) ──────────────────
+function TrendPersonCard({ user, hot }) {
+  const hue = user.hue || '#f0f0f0';
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7, flexShrink: 0, cursor: 'pointer' }}>
+      <div style={{
+        width: 64, height: 90, borderRadius: 22, overflow: 'hidden',
+        background: `linear-gradient(160deg, ${hue} 0%, ${hue}99 100%)`,
+        border: '1.5px solid rgba(0,0,0,0.07)', position: 'relative',
+        boxShadow: '0 4px 14px rgba(0,0,0,0.08)',
+      }}>
+        {/* person silhouette */}
+        <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.13)', marginBottom: -3 }}/>
+          <div style={{ width: 38, height: 50, borderRadius: '11px 11px 0 0', background: 'rgba(0,0,0,0.09)' }}/>
+        </div>
+        {/* style stripe accent */}
+        <div style={{ position: 'absolute', top: 12, left: 0, right: 0, height: 3, background: 'rgba(255,255,255,0.45)' }}/>
+        {hot && (
+          <div style={{ position: 'absolute', top: 6, right: 6, width: 18, height: 18, borderRadius: '50%', background: '#FF6EAF', border: '2px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8 }}>🔥</div>
+        )}
+      </div>
+      <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, fontWeight: 700, color: '#111', whiteSpace: 'nowrap' }}>
+        {user.handle.replace('@', '').split('.')[0]}
+      </span>
+    </div>
+  );
+}
+
+// ── Closet feed card (옷장 탭 탐색 피드) ─────────────────────────
+function ClosetFeedCard({ user }) {
+  const [peeked, setPeeked] = useState(false);
+  const thumbHues = [30, 90, 190, 310].map(offset =>
+    `hsl(${(parseInt(user.hue.slice(1,3),16) * 1.4 + offset) % 360}, 42%, 88%)`
+  );
+  return (
+    <div style={{
+      background: '#fff', borderRadius: 18, border: '1px solid rgba(0,0,0,0.07)',
+      padding: 14, display: 'flex', gap: 12, alignItems: 'center',
+      boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+    }}>
+      {/* avatar */}
+      <div style={{
+        width: 46, height: 46, borderRadius: '50%', flexShrink: 0,
+        background: user.hue, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontFamily: '"Press Start 2P", monospace', fontSize: 14, color: 'rgba(0,0,0,0.28)',
+        boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+      }}>
+        {user.handle[1].toUpperCase()}
+      </div>
+      {/* info */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+          <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, fontWeight: 700, color: '#111' }}>
+            {user.handle}
+          </span>
+          <span style={{
+            fontFamily: '"Space Grotesk", sans-serif', fontSize: 9, fontWeight: 700,
+            color: '#0a6b3e', background: '#E8FFF2', border: '1px solid rgba(61,255,166,0.45)',
+            padding: '1px 6px', borderRadius: 4,
+          }}>Lv.{Math.floor(user.items / 16)}</span>
+        </div>
+        <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(0,0,0,0.4)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 5 }}>
+          {user.bio}
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: 'rgba(0,0,0,0.32)' }}>
+            아이템 {user.items}
+          </span>
+          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: 'rgba(0,0,0,0.32)', display: 'flex', alignItems: 'center', gap: 3 }}>
+            <svg width="10" height="10" viewBox="0 0 14 14" fill="none"><path d="M3 3a1.5 1.5 0 011.5-1.5h5A1.5 1.5 0 0111 3v5a1.5 1.5 0 01-1.5 1.5H8l-2.5 2.5V9.5H4.5A1.5 1.5 0 013 8V3z" stroke="rgba(0,0,0,0.32)" strokeWidth="1.2"/></svg>
+            {Math.floor(user.items * 0.28)}
+          </span>
+        </div>
+      </div>
+      {/* right: thumbnail collage + 훔쳐보기 버튼 */}
+      <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 7 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3, width: 56 }}>
+          {thumbHues.map((h, i) => (
+            <div key={i} style={{ height: 26, borderRadius: 6, background: h }}/>
+          ))}
+        </div>
+        <button onClick={() => setPeeked(p => !p)} style={{
+          background: peeked ? 'linear-gradient(135deg, #3DFFA6, #25d688)' : '#111',
+          border: 'none', borderRadius: 999, padding: '5px 11px',
+          fontFamily: '"Space Grotesk", sans-serif', fontSize: 10, fontWeight: 700,
+          color: peeked ? '#0a2a18' : '#fff', cursor: 'pointer', whiteSpace: 'nowrap',
+          boxShadow: peeked ? '0 0 10px rgba(61,255,166,0.5)' : 'none',
+          transition: 'all 0.2s',
+        }}>
+          {peeked ? '보는 중 👀' : '옷장 훔쳐보기'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Codi grid card (코디 탭 2열 그리드) ──────────────────────────
+function CodiGridCard({ post, onClick }) {
+  return (
+    <div onClick={onClick} style={{
+      borderRadius: 16, overflow: 'hidden', cursor: 'pointer',
+      background: '#fff', border: '1px solid rgba(0,0,0,0.07)',
+      boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+    }}>
+      <OOTDPlaceholder seed={post.seed} tall/>
+      <div style={{ padding: '9px 10px 10px', background: '#fff' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
+          <Avatar name={post.user} size={20}/>
+          <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, fontWeight: 700, color: '#111', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {post.user}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{
+            fontFamily: '"Space Grotesk", sans-serif', fontSize: 9, fontWeight: 700,
+            color: '#0a6b3e', background: '#E8FFF2', border: '1px solid rgba(61,255,166,0.4)',
+            padding: '1px 5px', borderRadius: 3, whiteSpace: 'nowrap',
+          }}>{post.tier}·lv.{post.lv}</span>
+          <div style={{ flex: 1 }}/>
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
+            <path d="M3 3a1.5 1.5 0 011.5-1.5h5A1.5 1.5 0 0111 3v5a1.5 1.5 0 01-1.5 1.5H8l-2.5 2.5V9.5H4.5A1.5 1.5 0 013 8V3z" stroke="#bbb" strokeWidth="1.3"/>
+          </svg>
+          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: '#bbb' }}>{post.comments}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Public Showroom data ──────────────────────────────────────────
+const TREND_USERS = [
+  { handle: '@minjee_wears', hue: '#f9c8e0', hot: true  },
+  { handle: '@ader.life',    hue: '#c8d9f9', hot: true  },
+  { handle: '@juunj.fan',    hue: '#d2c8f9', hot: false },
+  { handle: '@87mm.daily',   hue: '#c8f9d2', hot: true  },
+  { handle: '@low.minimal',  hue: '#f9e5c8', hot: false },
+  { handle: '@mj_style',     hue: '#e8c8f9', hot: false },
+];
+
+const CODI_POSTS = [
+  { user: '@minjee_wears', seed: 0, tier: '패피',       lv: 12, score: 94, comments: 18, tags: ['미니멀','페미닌'] },
+  { user: '@ader.life',    seed: 1, tier: '스타일리스트', lv: 8,  score: 81, comments: 11, tags: ['스트릿','하이패션'] },
+  { user: '@juunj.fan',    seed: 2, tier: '코디왕',      lv: 5,  score: 78, comments: 7,  tags: ['젠더리스','준지'] },
+  { user: '@87mm.daily',   seed: 3, tier: '패피',        lv: 9,  score: 85, comments: 14, tags: ['스트릿','캐주얼'] },
+  { user: '@low.minimal',  seed: 4, tier: '초보',        lv: 2,  score: 71, comments: 5,  tags: ['미니멀','봄룩'] },
+  { user: '@mj_style',     seed: 0, tier: '코디왕',      lv: 7,  score: 88, comments: 22, tags: ['화이트','페미닌'] },
+];
+
+function PublicShowroom() {
+  const history = useHistory();
+  const [mainTab, setMainTab] = useState('코디');
+  const [search, setSearch] = useState('');
+
+  const filteredCodi = CODI_POSTS.filter(p =>
+    !search || p.user.includes(search) || p.tags.some(t => t.includes(search))
+  );
+  const filteredCloset = CLOSET_USERS.filter(u =>
+    !search || u.handle.includes(search) || u.bio.includes(search)
+  );
+
+  const SearchRow = () => (
+    <div style={{ display: 'flex', gap: 8, padding: '12px 16px 10px', background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+      <div style={{
+        flex: 1, height: 40, background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)',
+        borderRadius: 12, display: 'flex', alignItems: 'center', gap: 9, padding: '0 12px',
+      }}>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="6" cy="6" r="4.5" stroke="rgba(0,0,0,0.3)" strokeWidth="1.3"/>
+          <path d="M10 10l2.5 2.5" stroke="rgba(0,0,0,0.3)" strokeWidth="1.3" strokeLinecap="round"/>
+        </svg>
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder={mainTab === '옷장' ? '유저, 브랜드 검색…' : '코디, 태그 검색…'}
+          style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, color: '#111' }}/>
+        {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(0,0,0,0.3)', fontSize: 13, lineHeight: 1 }}>✕</button>}
+      </div>
+      <button style={{
+        flexShrink: 0, width: 40, height: 40, borderRadius: 12, border: '1px solid rgba(0,0,0,0.1)',
+        background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+      }}>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M2 4h12M4 8h8M6 12h4" stroke="#111" strokeWidth="1.6" strokeLinecap="round"/>
+        </svg>
+      </button>
+    </div>
+  );
+
+  const TrendSection = ({ label, badge, badgeColor, badgeBg }) => (
+    <div style={{ paddingTop: 16, paddingBottom: 4 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0 16px', marginBottom: 12 }}>
+        <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 15, fontWeight: 800, color: '#111' }}>{label}</span>
+        <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 7, color: badgeColor, background: badgeBg, padding: '2px 6px', borderRadius: 4, letterSpacing: 0.5 }}>{badge}</span>
+        <div style={{ flex: 1 }}/>
+        <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: 'rgba(0,0,0,0.35)', cursor: 'pointer' }}>전체보기 ›</span>
+      </div>
+      <div style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '0 16px 8px', scrollbarWidth: 'none' }}>
+        {TREND_USERS.map((u, i) => <TrendPersonCard key={i} user={u} hot={u.hot}/>)}
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: '#F7F7F7', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* sticky header */}
+      <div style={{ flexShrink: 0, background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+        <div style={{ padding: '48px 16px 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 13, color: '#111' }}>퍼블릭쇼룸</span>
+            <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
+              <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#FF6EAF', animation: 'ppBlink 1s infinite' }}/>
+              <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: '#FF6EAF' }}>LIVE</span>
+            </div>
+          </div>
+        </div>
+        {/* tabs */}
+        <div style={{ display: 'flex', padding: '0 16px' }}>
+          {['옷장', '코디'].map(t => (
+            <button key={t} onClick={() => { setMainTab(t); setSearch(''); }}
+              style={{
+                flex: 1, height: 42, border: 'none', cursor: 'pointer', background: 'none',
+                fontFamily: '"Space Grotesk", sans-serif', fontSize: 15, fontWeight: 800,
+                color: mainTab === t ? '#111' : 'rgba(0,0,0,0.28)',
+                borderBottom: mainTab === t ? '2.5px solid #111' : '2.5px solid transparent',
+                transition: 'all 0.15s',
+              }}>{t}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* scrollable content */}
+      <div style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none', paddingBottom: 68 }}>
+        <SearchRow/>
+
+        {mainTab === '옷장' ? (
+          <>
+            <TrendSection label="트렌드 옷장" badge="HOT" badgeColor="#0a6b3e" badgeBg="#E8FFF2"/>
+            {/* divider */}
+            <div style={{ height: 8, background: 'rgba(0,0,0,0.03)', borderTop: '1px solid rgba(0,0,0,0.05)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}/>
+            <div style={{ padding: '14px 16px 4px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 15, fontWeight: 800, color: '#111' }}>탐색</span>
+              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: 'rgba(0,0,0,0.35)' }}>{filteredCloset.length}명</span>
+            </div>
+            <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10, paddingBottom: 8 }}>
+              {filteredCloset.map((u, i) => <ClosetFeedCard key={i} user={u}/>)}
+              {filteredCloset.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '32px 0', fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, color: 'rgba(0,0,0,0.3)' }}>검색 결과가 없어요</div>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <TrendSection label="트렌드 코디" badge="NEW" badgeColor="#FF6EAF" badgeBg="rgba(255,110,175,0.1)"/>
+            {/* divider */}
+            <div style={{ height: 8, background: 'rgba(0,0,0,0.03)', borderTop: '1px solid rgba(0,0,0,0.05)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}/>
+            <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 15, fontWeight: 800, color: '#111' }}>탐색</span>
+              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: 'rgba(0,0,0,0.35)' }}>{filteredCodi.length}개</span>
+            </div>
+            <div style={{ padding: '0 16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, paddingBottom: 8 }}>
+              {filteredCodi.map((p, i) => (
+                <CodiGridCard key={i} post={p} onClick={() => history.push('/detail')}/>
+              ))}
+              {filteredCodi.length === 0 && (
+                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '32px 0', fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, color: 'rgba(0,0,0,0.3)' }}>검색 결과가 없어요</div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+
+      <SharedBottomNav/>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PERSONAL SHOWROOM  (/personal)
+// ═══════════════════════════════════════════════════════════════
+
+const CALENDAR_DATA = {
+  year: 2026, month: 4,
+  outfits: { 1:'S', 3:'A', 7:'B', 10:'S', 14:'A', 17:'A', 21:'S', 24:'B', 28:'A' },
+};
+
+// 날짜별 OOTD 룩 더미 데이터
+const CALENDAR_LOOKS = {
+  1: {
+    grade: 'S', score: 94, seed: 0,
+    caption: '봄 감성 미니멀 올화이트',
+    items: [
+      { ...WARDROBE_ITEMS[0] },
+      { ...WARDROBE_ITEMS[5] },
+      { ...WARDROBE_ITEMS[11] },
+    ],
+  },
+  7: {
+    grade: 'B', score: 62, seed: 3,
+    caption: 'Y2K 스트릿 레이어링',
+    items: [
+      { ...WARDROBE_ITEMS[1] },
+      { ...WARDROBE_ITEMS[7] },
+      { ...WARDROBE_ITEMS[14] },
+    ],
+  },
+  14: {
+    grade: 'A', score: 82, seed: 2,
+    caption: '오피스 페미닌 코디',
+    items: [
+      { ...WARDROBE_ITEMS[2] },
+      { ...WARDROBE_ITEMS[6] },
+      { ...WARDROBE_ITEMS[12] },
+    ],
+  },
+  21: {
+    grade: 'S', score: 94, seed: 1,
+    caption: '로우클래식 그린 톤온톤',
+    items: [
+      { ...WARDROBE_ITEMS[0] },
+      { ...WARDROBE_ITEMS[4] },
+      { ...WARDROBE_ITEMS[11] },
+    ],
+  },
+};
+
+function MiniCalendar() {
+  const { year, month, outfits } = CALENDAR_DATA;
+  const firstDay = new Date(year, month - 1, 1).getDay();
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const today = 21;
+  const [selectedDay, setSelectedDay] = useState(null);
+
+  const gradeColor = { S: '#3DFFA6', A: '#FFD166', B: '#FF6EAF', C: '#aaa' };
+  const weekdays = ['일','월','화','수','목','금','토'];
+
+  const cells = [];
+  for (let i = 0; i < firstDay; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+  const look = selectedDay ? CALENDAR_LOOKS[selectedDay] : null;
+
+  const handleDayClick = (d) => {
+    if (!outfits[d]) return;
+    setSelectedDay(prev => prev === d ? null : d);
+  };
+
+  return (
+    <div style={{
+      background: 'rgba(255,255,255,0.04)', borderRadius: 16,
+      border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden',
+    }}>
+      <div style={{ padding: '14px 16px' }}>
+        {/* header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: '#3DFFA6' }}>
+            {year}.{String(month).padStart(2,'0')}
+          </span>
+          <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
+            코디 기록 {Object.keys(outfits).length}일
+          </span>
+        </div>
+        {/* weekday headers */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, marginBottom: 4 }}>
+          {weekdays.map(w => (
+            <div key={w} style={{ textAlign: 'center', fontFamily: '"Space Grotesk", sans-serif', fontSize: 9,
+              color: w === '일' ? '#FF6EAF' : w === '토' ? '#3DFFA6' : 'rgba(255,255,255,0.3)' }}>
+              {w}
+            </div>
+          ))}
+        </div>
+        {/* day cells */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
+          {cells.map((d, i) => {
+            if (!d) return <div key={`e${i}`}/>;
+            const grade = outfits[d];
+            const isToday = d === today;
+            const isSelected = d === selectedDay;
+            const hasLook = !!CALENDAR_LOOKS[d];
+            return (
+              <div key={d}
+                onClick={() => handleDayClick(d)}
+                style={{
+                  aspectRatio: '1', borderRadius: 7, display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: 1,
+                  background: isSelected ? 'rgba(61,255,166,0.22)' : isToday ? 'rgba(61,255,166,0.12)' : grade ? 'rgba(255,255,255,0.04)' : 'transparent',
+                  border: isSelected ? '1.5px solid #3DFFA6' : isToday ? '1px solid rgba(61,255,166,0.35)' : '1px solid transparent',
+                  cursor: hasLook ? 'pointer' : 'default',
+                  transition: 'all 0.15s',
+                  boxShadow: isSelected ? '0 0 10px rgba(61,255,166,0.3)' : 'none',
+                }}>
+                <span style={{
+                  fontFamily: '"Space Grotesk", sans-serif', fontSize: 10, lineHeight: 1,
+                  color: isSelected ? '#3DFFA6' : isToday ? '#3DFFA6' : 'rgba(255,255,255,0.6)',
+                  fontWeight: isSelected || isToday ? 700 : 400,
+                }}>{d}</span>
+                {grade && (
+                  <span style={{
+                    fontFamily: '"Press Start 2P", monospace', fontSize: 6, lineHeight: 1,
+                    color: isSelected ? gradeColor[grade] : gradeColor[grade], opacity: isSelected ? 1 : 0.8,
+                  }}>{grade}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 인라인 OOTD 확장 패널 */}
+      {look && (
+        <div style={{
+          borderTop: '1px solid rgba(61,255,166,0.2)',
+          background: 'linear-gradient(180deg, rgba(61,255,166,0.07) 0%, rgba(61,255,166,0.03) 100%)',
+          padding: '14px 16px 16px',
+          animation: 'ppSlideIn 0.22s ease',
+        }}>
+          {/* panel header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: `linear-gradient(135deg, ${gradeColor[look.grade]}, ${look.grade === 'S' ? '#25d688' : look.grade === 'A' ? '#e6b800' : '#e03d8a'})`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: '"Press Start 2P", monospace', fontSize: 14, color: look.grade === 'B' ? '#fff' : '#0a2a18',
+              boxShadow: `0 0 12px ${gradeColor[look.grade]}55`,
+              flexShrink: 0,
+            }}>{look.grade}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, fontWeight: 700, color: '#fff', marginBottom: 2 }}>
+                {look.caption}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: gradeColor[look.grade] }}>
+                  {look.score}pt
+                </span>
+                <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>
+                  2026.04.{String(selectedDay).padStart(2,'0')}
+                </span>
+              </div>
+            </div>
+            <button onClick={() => setSelectedDay(null)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', fontSize: 18, lineHeight: 1, padding: 4 }}>
+              ×
+            </button>
+          </div>
+          {/* outfit preview + items scroll */}
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            {/* mini outfit thumbnail */}
+            <div style={{ flexShrink: 0, width: 64, height: 80, borderRadius: 12, overflow: 'hidden' }}>
+              <OOTDPlaceholder seed={look.seed} tall/>
+            </div>
+            {/* items horizontal scroll */}
+            <div style={{ flex: 1, overflowX: 'auto', scrollbarWidth: 'none' }}>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {look.items.map((item, i) => (
+                  <div key={i} style={{ flexShrink: 0, width: 60 }}>
+                    <div style={{ height: 60, borderRadius: 10, background: item.hue, marginBottom: 5, border: '1px solid rgba(255,255,255,0.1)' }}/>
+                    <div style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 7, color: 'rgba(255,255,255,0.35)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {item.brand}
+                    </div>
+                    <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 8, color: 'rgba(255,255,255,0.6)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 1 }}>
+                      {item.name}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const COLLECTION_CARDS = [
+  { title: '봄 미니멀 룩', count: 8,  hues: ['#f9c8e0', '#c8d9f9', '#d2c8f9'] },
+  { title: 'Y2K 스트릿',   count: 12, hues: ['#c8f9d2', '#f9f0c8', '#f9c8c8'] },
+  { title: '오피스 코어',  count: 5,  hues: ['#e8f9c8', '#c8e8f9', '#e8c8f9'] },
+  { title: '모노크롬 셋',  count: 7,  hues: ['#f5f5f5', '#d5d5d5', '#b5b5b5'] },
+];
+
+function CollectionCard({ card }) {
+  return (
+    <div style={{
+      borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer',
+    }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gridTemplateRows: '1fr 1fr', height: 90 }}>
+        <div style={{ gridRow: '1 / 3', background: card.hues[0] }}/>
+        <div style={{ background: card.hues[1] }}/>
+        <div style={{ background: card.hues[2] }}/>
+      </div>
+      <div style={{
+        padding: '8px 10px', background: 'rgba(255,255,255,0.03)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, fontWeight: 700, color: '#fff' }}>
+          {card.title}
+        </span>
+        <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>
+          {card.count}개
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function PersonalShowroom() {
+  const [tab, setTab] = useState('쇼룸');
+  const [wardrobeCat, setWardrobeCat] = useState('전체');
+  const tabs = ['쇼룸', '옷장', '콜렉션'];
+  const wardrobeCats = ['전체', '상의', '아우터', '바지', '원피스·스커트', '신발', '가방', '소품'];
+  const filtered = wardrobeCat === '전체' ? dummyProducts : dummyProducts.filter(i => i.category === wardrobeCat);
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, background: '#1A1A1A',
+      display: 'flex', flexDirection: 'column', overflow: 'hidden',
+    }}>
+      {/* profile header */}
+      <div style={{
+        padding: '48px 20px 0', flexShrink: 0,
+        background: 'linear-gradient(180deg, #0d1f17 0%, #1A1A1A 100%)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+          {/* avatar */}
+          <div style={{
+            width: 60, height: 60, borderRadius: '50%', flexShrink: 0,
+            background: 'linear-gradient(135deg, #3DFFA6, #25d688)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: '"Press Start 2P", monospace', fontSize: 18, color: '#0a2a18',
+            boxShadow: '0 0 20px rgba(61,255,166,0.4)',
+          }}>K</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 12, color: '#fff', marginBottom: 4 }}>
+              @kate.style
+            </div>
+            <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
+              미니멀 · 젠더리스 · 로우클래식 애호가
+            </div>
+          </div>
+          <button onClick={() => {}}
+            style={{
+              padding: '7px 14px', borderRadius: 999, border: '1px solid rgba(255,255,255,0.2)',
+              background: 'transparent', fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, fontWeight: 600,
+              color: 'rgba(255,255,255,0.7)', cursor: 'pointer',
+            }}>편집</button>
+        </div>
+        {/* stats row */}
+        <div style={{ display: 'flex', gap: 0, marginBottom: 16 }}>
+          {[['코디 기록', '47'], ['평균 등급', 'A+'], ['팔로워', '234']].map(([label, val], i, arr) => (
+            <div key={label} style={{
+              flex: 1, textAlign: 'center', padding: '10px 0',
+              borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none',
+            }}>
+              <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 13, color: '#3DFFA6', marginBottom: 4 }}>{val}</div>
+              <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>{label}</div>
+            </div>
+          ))}
+        </div>
+        {/* tabs */}
+        <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+          {tabs.map(t => (
+            <button key={t} onClick={() => setTab(t)}
+              style={{
+                flex: 1, height: 38, border: 'none', cursor: 'pointer', background: 'none',
+                fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, fontWeight: 700,
+                color: tab === t ? '#3DFFA6' : 'rgba(255,255,255,0.35)',
+                borderBottom: tab === t ? '2px solid #3DFFA6' : '2px solid transparent',
+                marginBottom: -1, transition: 'all 0.15s',
+              }}>{t}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* tab content */}
+      <div style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none', paddingBottom: 68 }}>
+        {tab === '쇼룸' && (
+          <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* recent grade */}
+            <div style={{
+              padding: '14px 16px', borderRadius: 14,
+              background: 'rgba(61,255,166,0.07)', border: '1px solid rgba(61,255,166,0.2)',
+              display: 'flex', alignItems: 'center', gap: 14,
+            }}>
+              <div style={{
+                width: 48, height: 48, borderRadius: 12,
+                background: 'linear-gradient(135deg, #3DFFA6, #25d688)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: '"Press Start 2P", monospace', fontSize: 20, color: '#0a2a18',
+              }}>S</div>
+              <div>
+                <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 3 }}>
+                  오늘의 평가 · 2026.04.21
+                </div>
+                <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 10, color: '#fff' }}>
+                  S등급 · 94점
+                </div>
+                <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: '#3DFFA6', marginTop: 2 }}>
+                  상위 3% · 미니멀 페미닌 완성
+                </div>
+              </div>
+            </div>
+            {/* calendar */}
+            <MiniCalendar/>
+            {/* recent items */}
+            <div>
+              <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: 'rgba(255,255,255,0.4)', marginBottom: 10 }}>
+                최근 착용 아이템
+              </div>
+              <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none' }}>
+                {dummyProducts.slice(0, 5).map(item => (
+                  <div key={item.id} style={{
+                    flexShrink: 0, width: 70, borderRadius: 10, overflow: 'hidden',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                  }}>
+                    <div style={{ height: 80, background: '#f5f5f5', position: 'relative', overflow: 'hidden' }}>
+                      <img src={item.imageUrl} alt={item.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        onError={e => { e.target.style.display='none'; e.target.parentNode.style.background='#ececec'; }}
+                      />
+                    </div>
+                    <div style={{ padding: '5px 5px 6px', background: 'rgba(255,255,255,0.03)' }}>
+                      <div style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 7, color: 'rgba(255,255,255,0.35)',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {item.brand}
+                      </div>
+                      <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 8, color: 'rgba(255,255,255,0.6)',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 1 }}>
+                        {item.category}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {tab === '옷장' && (
+          <div style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
+                총 {dummyProducts.length}개 아이템
+              </span>
+              <button style={{ background: 'rgba(61,255,166,0.1)', border: '1px solid rgba(61,255,166,0.3)', borderRadius: 999,
+                padding: '5px 12px', fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, fontWeight: 700,
+                color: '#3DFFA6', cursor: 'pointer' }}>
+                + 추가
+              </button>
+            </div>
+            <CategoryStrip cats={wardrobeCats} active={wardrobeCat} onSelect={setWardrobeCat} dark={true}/>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginTop: 4 }}>
+              {filtered.map(item => (
+                <ProductCard key={item.id} item={item} selected={false} onToggle={() => {}}/>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {tab === '콜렉션' && (
+          <div style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
+                {COLLECTION_CARDS.length}개 콜렉션
+              </span>
+              <button style={{ background: 'rgba(61,255,166,0.1)', border: '1px solid rgba(61,255,166,0.3)', borderRadius: 999,
+                padding: '5px 12px', fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, fontWeight: 700,
+                color: '#3DFFA6', cursor: 'pointer' }}>
+                + 새 콜렉션
+              </button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+              {COLLECTION_CARDS.map((card, i) => <CollectionCard key={i} card={card}/>)}
+            </div>
+            {/* empty collection placeholder */}
+            <div style={{
+              marginTop: 4, padding: '28px 0', borderRadius: 14,
+              border: '2px dashed rgba(255,255,255,0.08)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+              cursor: 'pointer',
+            }}>
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <path d="M14 5v18M5 14h18" stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>
+                새 콜렉션 만들기
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <SharedBottomNav/>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// APP — ROUTER + DEVICE WRAPPER
+// ═══════════════════════════════════════════════════════════════
+
+function DeviceWrapper() {
+  const location = useLocation();
+  const lightPaths = ['/feed', '/detail'];
+  const isDark = !lightPaths.includes(location.pathname);
+
+  return (
+    <IOSDevice dark={isDark}>
+      <Switch>
+        <Route exact path="/"           component={PaepyeongOnboarding}/>
+        <Route       path="/result"     component={PaepyeongResult}/>
+        <Route       path="/feed"       component={PublicShowroom}/>
+        <Route       path="/detail"     component={PaepyeongDetail}/>
+        <Route       path="/paepyeong"  component={PaepyeongHub}/>
+        <Route       path="/personal"   component={PersonalShowroom}/>
+      </Switch>
+    </IOSDevice>
+  );
+}
+
+function RouteLabel() {
+  const location = useLocation();
+  const labels = {
+    '/':          '01 Onboarding · OOTD Upload',
+    '/result':    '02 Result · Score / Grade',
+    '/feed':      '03 퍼블릭쇼룸 · Public Showroom',
+    '/detail':    '04 Detail · A/B 코디 투표',
+    '/paepyeong': '05 패평 Hub · AI 평가',
+    '/personal':  '06 퍼스널쇼룸 · Personal Showroom',
+  };
+  return (
+    <div className="pp-caption">★ {labels[location.pathname] || '패평'} ★</div>
+  );
+}
+
+function App() {
+  return (
+    <HashRouter>
+      <RouteLabel/>
+      <DeviceWrapper/>
+    </HashRouter>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
