@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>패션 아이돌 분석기</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --accent: #c8ff00;
+    --accent2: #ff6b35;
+    --text: #f0f0f0;
+    --text-muted: #666;
+    --text-dim: #999;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  header {
+    max-width: 900px;
+    margin: 0 auto 40px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 24px;
+  }
+
+  .header-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+  }
+
+  h1 { font-size: 28px; font-weight: 900; letter-spacing: -1px; line-height: 1.2; }
+  h1 span { color: var(--accent); }
+  .subtitle { margin-top: 8px; color: var(--text-muted); font-size: 13px; font-weight: 300; }
+
+  .main { max-width: 900px; margin: 0 auto; display: grid; gap: 20px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  /* terminal step guide */
+  .terminal {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    line-height: 2;
+    color: #8b949e;
+    margin-bottom: 16px;
+  }
+  .terminal .cmd  { color: #79c0ff; }
+  .terminal .cmt  { color: #3d444d; }
+  .terminal .ok   { color: var(--accent); }
+  .terminal .step { color: #e3b341; }
+
+  .api-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .input-group { display: flex; flex-direction: column; gap: 6px; }
+  .input-group label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+  input, select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+
+  .category-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 12px; }
+
+  .cat-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 8px;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .cat-btn:hover { border-color: var(--accent); color: var(--text); }
+  .cat-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
+
+  .btn-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .btn-sm {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.15s;
+  }
+  .btn-sm:hover { border-color: var(--text-dim); color: var(--text); }
+
+  .settings-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+
+  .run-btn {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    padding: 16px;
+    color: #000;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .run-btn:hover { background: #d4ff1a; transform: translateY(-1px); }
+  .run-btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; transform: none; }
+
+  /* progress */
+  .progress-section { display: none; }
+  .progress-bar-wrap { background: var(--surface2); border-radius: 100px; height: 6px; margin: 12px 0; overflow: hidden; }
+  .progress-bar { height: 100%; background: var(--accent); border-radius: 100px; transition: width 0.3s; width: 0%; }
+  .progress-log {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    max-height: 130px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .log-line { color: var(--text-dim); }
+  .log-line.ok  { color: var(--accent); }
+  .log-line.err { color: var(--accent2); }
+
+  /* results */
+  .results-section { display: none; }
+  .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .results-title { font-size: 18px; font-weight: 700; }
+  .export-btn {
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: var(--accent);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.15s;
+  }
+  .export-btn:hover { background: var(--accent); color: #000; }
+
+  .result-cards { display: grid; gap: 16px; }
+
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .result-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .category-badge { background: var(--accent); color: #000; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 100px; }
+  .search-keyword { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-muted); }
+
+  .idol-rankings { display: flex; flex-direction: column; gap: 10px; }
+  .idol-row { display: flex; align-items: center; gap: 12px; }
+  .rank-num { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-muted); width: 24px; flex-shrink: 0; }
+  .rank-num.gold   { color: #FFD700; }
+  .rank-num.silver { color: #C0C0C0; }
+  .rank-num.bronze { color: #CD7F32; }
+  .idol-name { font-size: 14px; font-weight: 500; flex: 1; min-width: 80px; }
+  .idol-bar-wrap { flex: 2; background: var(--surface2); border-radius: 100px; height: 6px; overflow: hidden; }
+  .idol-bar { height: 100%; border-radius: 100px; background: var(--accent); transition: width 0.6s ease; }
+  .idol-count { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-muted); width: 50px; text-align: right; flex-shrink: 0; }
+  .no-result { font-size: 13px; color: var(--text-muted); font-style: italic; }
+
+  @media (max-width: 600px) {
+    .category-grid { grid-template-columns: repeat(3, 1fr); }
+    .api-inputs, .settings-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">✦ FASHION IDOL ANALYZER</div>
+  <h1>패션 카테고리별<br><span>대표 아이돌</span> 분석기</h1>
+  <p class="subtitle">네이버 블로그/뉴스 검색 API · 언급 빈도 자동 집계</p>
+</header>
+
+<div class="main">
+
+  <!-- STEP 1: 서버 실행 안내 -->
+  <div class="card">
+    <div class="section-title">① 로컬 서버 실행 (최초 1회)</div>
+    <div class="terminal">
+      <span class="cmt"># 터미널(cmd/PowerShell)을 열고 아래 순서대로 실행</span><br>
+      <span class="step">STEP 1</span> &nbsp;라이브러리 설치<br>
+      <span class="cmd">&nbsp;&nbsp;pip install flask flask-cors requests</span><br><br>
+      <span class="step">STEP 2</span> &nbsp;server.py 가 있는 폴더로 이동<br>
+      <span class="cmd">&nbsp;&nbsp;cd Downloads</span> &nbsp;<span class="cmt">(server.py 저장한 폴더)</span><br><br>
+      <span class="step">STEP 3</span> &nbsp;서버 실행<br>
+      <span class="cmd">&nbsp;&nbsp;python server.py</span><br><br>
+      <span class="ok">&nbsp;&nbsp;✅ http://localhost:5000 에서 이 페이지를 열기</span>
+    </div>
+    <div style="font-size:12px;color:var(--text-muted);line-height:1.8;">
+      💡 server.py와 index.html을 <strong style="color:var(--text)">같은 폴더</strong>에 저장하고,
+      브라우저에서 <strong style="color:var(--accent)">http://localhost:5000</strong> 으로 접속하면 CORS 없이 작동해요.
+    </div>
+  </div>
+
+  <!-- STEP 2: API Key -->
+  <div class="card">
+    <div class="section-title">② 네이버 API 키 입력</div>
+    <div class="terminal" style="margin-bottom:16px;">
+      <span class="cmt"># 발급: developers.naver.com → 앱 등록 → 검색 API 선택 → Client ID/Secret 복사</span>
+    </div>
+    <div class="api-inputs">
+      <div class="input-group">
+        <label>Client ID</label>
+        <input type="text" id="clientId" placeholder="예) abc123XYZ">
+      </div>
+      <div class="input-group">
+        <label>Client Secret</label>
+        <input type="password" id="clientSecret" placeholder="예) secretKey123">
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Categories -->
+  <div class="card">
+    <div class="section-title">③ 분석할 카테고리 선택</div>
+    <div class="btn-row">
+      <button class="btn-sm" onclick="selectAll()">전체 선택</button>
+      <button class="btn-sm" onclick="clearAll()">전체 해제</button>
+    </div>
+    <div class="category-grid" id="categoryGrid"></div>
+
+    <div class="section-title" style="margin-top:20px;">④ 검색 설정</div>
+    <div class="settings-row">
+      <div class="input-group">
+        <label>검색 소스</label>
+        <select id="searchSource">
+          <option value="blog">네이버 블로그</option>
+          <option value="news">네이버 뉴스</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>카테고리당 수집 글 수</label>
+        <select id="resultCount">
+          <option value="20">20개 (빠름)</option>
+          <option value="50" selected>50개 (권장)</option>
+          <option value="100">100개 (정확)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Run -->
+  <button class="run-btn" id="runBtn" onclick="runAnalysis()">
+    🔍 분석 시작
+  </button>
+
+  <!-- Progress -->
+  <div class="card progress-section" id="progressSection">
+    <div class="section-title">분석 진행 중...</div>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div id="progressText" style="font-size:12px;color:var(--text-muted);margin-bottom:8px;"></div>
+    <div class="progress-log" id="progressLog"></div>
+  </div>
+
+  <!-- Results -->
+  <div class="results-section" id="resultsSection">
+    <div class="results-header">
+      <div class="results-title">📊 분석 결과</div>
+      <button class="export-btn" onclick="exportCSV()">CSV 내보내기</button>
+    </div>
+    <div class="result-cards" id="resultCards"></div>
+  </div>
+
+</div>
+
+<script>
+const CATEGORIES = [
+  '캐주얼','미니멀','스포티','클래식','워크웨어',
+  '고프코어','프레피','에스닉','스트릿','갤러리',
+  '로맨틱','시크','시티보이','레트로','리조트'
+];
+
+const IDOL_NAMES = [
+  // 그룹 (영문+한글)
+  'aespa','IVE','NewJeans','뉴진스','LE SSERAFIM','르세라핌',
+  'BLACKPINK','블랙핑크','TWICE','트와이스','BTS','방탄소년단',
+  'EXO','NCT','SEVENTEEN','세븐틴','Stray Kids','스트레이키즈',
+  'ENHYPEN','엔하이픈','TXT','투모로우바이투게더',
+  'ITZY','있지','NMIXX','엔믹스','MONSTA X','몬스타엑스',
+  'Red Velvet','레드벨벳','f(x)','SHINee','샤이니',
+  'GOT7','갓세븐','2NE1','투애니원','BIGBANG','빅뱅',
+  'MAMAMOO','마마무','SISTAR','씨스타',
+  // 솔로/개인
+  '지수','제니','로제','리사',
+  '카리나','윈터','닝닝','지젤',
+  '장원영','안유진','레이','리즈',
+  '민지','하니','다니엘','혜인','해린',
+  '채원','사쿠라','허윤진','카즈하','홍은채',
+  '태민','태용','지민','정국','뷔','슈가','RM','진','제이홉',
+  'G-Dragon','지드래곤','GD','탑','TOP','태양',
+  '효연','솔라','화사','휘인','문별','화사',
+  '아이유','IU','청하','선미','현아','HyunA',
+];
+
+const NORMALIZE = {
+  'aespa':'aespa','IVE':'IVE',
+  'NewJeans':'NewJeans','뉴진스':'NewJeans',
+  'LE SSERAFIM':'LE SSERAFIM','르세라핌':'LE SSERAFIM',
+  'BLACKPINK':'BLACKPINK','블랙핑크':'BLACKPINK',
+  'TWICE':'TWICE','트와이스':'TWICE',
+  'BTS':'BTS','방탄소년단':'BTS',
+  'Stray Kids':'Stray Kids','스트레이키즈':'Stray Kids',
+  'ENHYPEN':'ENHYPEN','엔하이픈':'ENHYPEN',
+  'TXT':'TXT','투모로우바이투게더':'TXT',
+  'ITZY':'ITZY','있지':'ITZY',
+  'NMIXX':'NMIXX','엔믹스':'NMIXX',
+  'Red Velvet':'Red Velvet','레드벨벳':'Red Velvet',
+  'SHINee':'SHINee','샤이니':'SHINee',
+  'GOT7':'GOT7','갓세븐':'GOT7',
+  '2NE1':'2NE1','투애니원':'2NE1',
+  'BIGBANG':'BIGBANG','빅뱅':'BIGBANG',
+  'MAMAMOO':'MAMAMOO','마마무':'MAMAMOO',
+  'G-Dragon':'G-Dragon','지드래곤':'G-Dragon','GD':'G-Dragon',
+  'TOP':'T.O.P','탑':'T.O.P',
+  '아이유':'IU','IU':'IU',
+  '현아':'HyunA','HyunA':'HyunA',
+};
+
+let selectedCategories = new Set(CATEGORIES);
+let analysisResults = {};
+
+// 카테고리 버튼 생성
+const grid = document.getElementById('categoryGrid');
+CATEGORIES.forEach(cat => {
+  const btn = document.createElement('button');
+  btn.className = 'cat-btn active';
+  btn.textContent = cat;
+  btn.onclick = () => {
+    if (selectedCategories.has(cat)) {
+      selectedCategories.delete(cat); btn.classList.remove('active');
+    } else {
+      selectedCategories.add(cat); btn.classList.add('active');
+    }
+  };
+  grid.appendChild(btn);
+});
+
+function selectAll() {
+  CATEGORIES.forEach(c => selectedCategories.add(c));
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.add('active'));
+}
+function clearAll() {
+  selectedCategories.clear();
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+}
+
+function log(msg, type='') {
+  const el = document.getElementById('progressLog');
+  const d = document.createElement('div');
+  d.className = `log-line ${type}`;
+  d.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  el.appendChild(d);
+  el.scrollTop = el.scrollHeight;
+}
+
+function countIdols(text) {
+  const counts = {};
+  const lower = text.toLowerCase();
+  IDOL_NAMES.forEach(name => {
+    const lname = name.toLowerCase();
+    let n = 0, idx = lower.indexOf(lname);
+    while (idx !== -1) { n++; idx = lower.indexOf(lname, idx+1); }
+    if (n > 0) {
+      const key = NORMALIZE[name] || name;
+      counts[key] = (counts[key] || 0) + n;
+    }
+  });
+  return counts;
+}
+
+async function runAnalysis() {
+  const clientId     = document.getElementById('clientId').value.trim();
+  const clientSecret = document.getElementById('clientSecret').value.trim();
+  const source       = document.getElementById('searchSource').value;
+  const display      = document.getElementById('resultCount').value;
+
+  if (!clientId || !clientSecret) { alert('API 키를 입력해주세요!'); return; }
+  if (selectedCategories.size === 0) { alert('카테고리를 선택해주세요!'); return; }
+
+  const runBtn = document.getElementById('runBtn');
+  runBtn.disabled = true;
+  runBtn.textContent = '분석 중...';
+
+  document.getElementById('progressSection').style.display = 'block';
+  document.getElementById('resultsSection').style.display = 'none';
+  document.getElementById('progressLog').innerHTML = '';
+  analysisResults = {};
+
+  const cats = Array.from(selectedCategories);
+  let done = 0;
+
+  for (const cat of cats) {
+    const query = `${cat} 아이돌 패션 스타일`;
+    document.getElementById('progressText').textContent = `(${done+1}/${cats.length}) "${cat}" 분석 중...`;
+    log(`"${query}" 검색 중...`);
+
+    try {
+      const params = new URLSearchParams({ query, source, display, clientId, clientSecret });
+      const resp = await fetch(`http://localhost:5000/search?${params}`);
+      const data = await resp.json();
+
+      if (data.error) throw new Error(data.error);
+
+      const items = data.items || [];
+      const fullText = items.map(i => `${i.title} ${i.description}`).join(' ').replace(/<[^>]+>/g,' ');
+      const counts = countIdols(fullText);
+      const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+      analysisResults[cat] = { results: sorted, total: items.length };
+      log(`✓ ${cat}: 상위 ${sorted.length}명 (${items.length}개 글)`, 'ok');
+
+    } catch(e) {
+      log(`✗ ${cat}: ${e.message}`, 'err');
+      analysisResults[cat] = { results: [], total: 0, error: e.message };
+    }
+
+    done++;
+    document.getElementById('progressBar').style.width = `${(done/cats.length)*100}%`;
+    await new Promise(r => setTimeout(r, 350));
+  }
+
+  log('✅ 전체 분석 완료!', 'ok');
+  document.getElementById('progressText').textContent = '완료!';
+  runBtn.disabled = false;
+  runBtn.textContent = '✓ 완료 (다시 실행)';
+
+  renderResults();
+}
+
+function renderResults() {
+  const section = document.getElementById('resultsSection');
+  const cards   = document.getElementById('resultCards');
+  section.style.display = 'block';
+  cards.innerHTML = '';
+
+  const rankColors  = ['gold','silver','bronze','',''];
+  const rankLabels  = ['1ST','2ND','3RD','4TH','5TH'];
+
+  Object.entries(analysisResults).forEach(([cat, data]) => {
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    const maxCount = data.results[0]?.[1] || 1;
+
+    let html = data.error
+      ? `<div class="no-result">오류: ${data.error}</div>`
+      : data.results.length === 0
+        ? `<div class="no-result">관련 아이돌 데이터 없음 (목록에 없는 아이돌일 수 있어요)</div>`
+        : data.results.map(([name, count], i) => `
+            <div class="idol-row">
+              <div class="rank-num ${rankColors[i]}">${rankLabels[i]}</div>
+              <div class="idol-name">${name}</div>
+              <div class="idol-bar-wrap"><div class="idol-bar" style="width:${(count/maxCount)*100}%"></div></div>
+              <div class="idol-count">${count}회</div>
+            </div>`).join('');
+
+    card.innerHTML = `
+      <div class="result-card-header">
+        <div class="category-badge">${cat}</div>
+        <div class="search-keyword">"${cat} 아이돌 패션 스타일" · ${data.total}개 글 분석</div>
+      </div>
+      <div class="idol-rankings">${html}</div>`;
+
+    cards.appendChild(card);
+  });
+
+  section.scrollIntoView({ behavior:'smooth' });
+}
+
+function exportCSV() {
+  let csv = '카테고리,순위,아이돌,언급횟수\n';
+  Object.entries(analysisResults).forEach(([cat, data]) => {
+    data.results.forEach(([name, count], i) => {
+      csv += `${cat},${i+1},${name},${count}\n`;
+    });
+  });
+  const blob = new Blob(['\uFEFF'+csv], { type:'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `fashion-idol-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+</script>
+</body>
+</html>
