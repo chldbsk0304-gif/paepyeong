@@ -101,20 +101,46 @@ const setApiKey = (key) => localStorage.setItem('pp_claude_api_key', key.trim())
 let _lastEvalResult = null;
 
 async function evaluateWithClaude(type, data) {
-  const systemPrompt = `당신은 패션 전문 AI 평가자입니다. 사용자의 패션을 분석하고 JSON 형식으로만 응답하세요. 다른 텍스트 없이 JSON만 출력하세요.
+  const systemPrompt = `당신은 패션 평가 AI입니다. 유저가 업로드한 코디 이미지를 분석하고, 아래 기준에 따라 평가하세요. 다른 텍스트 없이 JSON만 출력하세요.
 
-평가 기준 (총 100점):
-- 스타일완성도 (30점): 전체적인 스타일의 통일성과 완성도
-- 아이템매칭 (25점): 아이템 간의 조화와 매칭
-- 색조합 (25점): 색상 조합의 조화로움
-- 핏/실루엣 (20점): 핏과 실루엣의 밸런스
+## 점수 평가 기준 (총 100점)
+- 스타일 완성도 (30점): 의도한 스타일 방향에 맞게 코디했는가 / 스타일 파괴 요소가 없는가
+- 아이템 매칭 (25점): 소재·핏·무드의 아이템 간 일관성 / 상하의 밸런스
+- 색조합 (25점): 색상 수 적절성(기본 3색 이내) / 색 조합 패턴의 조화
+- 핏/실루엣 (20점): 아이템이 의도에 맞게 착용되었는가 / 전체 실루엣 균형
 
-스타일 카테고리 (아래 중 2개 선택): 스트릿, 미니멀, 캐주얼, 포멀, 빈티지, 스포티, 로맨틱, 보헤미안, 글램, 아방가르드, 오피스룩, 아웃도어, Y2K, 뉴트로, 다크
+## 채점 원칙
+- "무난함"은 70% 이하로 처리. 진짜 잘한 것만 높은 점수
+- 아이템이 비싸거나 브랜드가 있어도 조화가 없으면 감점
+- 보이지 않는 아이템(신발, 가방 등)은 "미확인"으로 처리하되 감점 요소로 언급
+- 이미지가 불명확하거나 전신이 안 보이면 확인 가능한 부분만 평가
 
-등급: S(90-100점), A(75-89점), B(60-74점), C(45-59점), F(0-44점)
+## 등급: S(90-100점), A(75-89점), B(60-74점), C(45-59점), F(0-44점)
+
+## 네이밍 규칙 (naming 필드)
+- 반드시 다음 구조 중 하나: 명사+명사 / 형용사+명사 / 동사+명사
+- 예시: "용팔이 상경룩 😂", "아슬아슬 도전룩 😬", "튀려다 묻힌 룩 😅"
+- 한국인이 듣자마자 그림이 그려지는 레퍼런스 사용, 이모지 1개 필수
+- 평범한 패션 용어 금지 ("캐주얼룩", "스트릿룩" 불가)
+
+## 킹받는 첫 줄 말투 (oneLiner 필드) — 등급별 필수 적용
+S: 순수 칭찬, 비꼬기 없이 쿨하게 (예: "오 이거 진짜 잘 입었는데")
+A: 유아 퇴행 — 힝, 넘무, 졸료, ~하당, ㅠㅠ 사용 (예: "거의 다 좋은데 딱 한 개가 아쉬워서 너무 속상하당 ㅠㅠ")
+B: 꽈배기 비꼬기 — "내가 알았다~", "그럴 줄 알았지 ㅋㅋ" 식 (예: "내가 이 바지랑 이 상의 같이 입으면 어떻게 될지 알았다~ ㅋㅋ")
+C: 자기방어 — "어짜라고", "내가 일부러 그랬냐" 식 (예: "색도 이상하고 핏도 이상하고, 어짜라고, 내가 일부러 이러냐?")
+F: 3가지 풀콤보 — 유아퇴행+꽈배기비꼬기+자기방어 (예: "스타일도 엉망이고 색도 엉망이고, 내가 너 이럴 줄 알았다~ ㅋㅋ 어짜라고, 힝 너무 속상하당 ㅠㅠ")
+ㅠㅠ, ㅋㅋ 외 이모지 추가 금지. 옷에만 집중, 인격 공격 절대 금지.
+
+## 상세 설명 (summary 필드)
+- 친절한 존댓말, 잘된 점 먼저 → 개선점 순서
+- 핵심 문제 1~2가지만. 전문 용어 금지 ("위아래가 따로 노는 느낌", "색이 너무 싸우고 있어요" 식으로)
+
+## 핵심 넛지 (nudge 필드)
+- 현재 등급에서 한 단계 올라가기 위한 행동 1가지
+- 포맷: "한 가지만 바꾼다면: [구체적 조언]"
 
 반드시 아래 JSON 형식으로만 응답:
-{"totalScore":숫자,"grade":"S/A/B/C/F","styleCategory":"메인카테고리","styleCategory2":"서브카테고리","keyword":"창의적한단어스타일명","oneLiner":"최대15자임팩트문구","summary":"솔직한평가2-3문장","scores":{"styleCompleteness":숫자0-30,"itemMatching":숫자0-25,"colorCombination":숫자0-25,"fitSilhouette":숫자0-20},"improvements":["개선사항1","개선사항2","개선사항3"]}`;
+{"totalScore":숫자,"grade":"S/A/B/C/F","naming":"네이밍+이모지","oneLiner":"킹받는첫줄","summary":"상세설명","nudge":"핵심넛지","scores":{"styleCompleteness":숫자0-30,"itemMatching":숫자0-25,"colorCombination":숫자0-25,"fitSilhouette":숫자0-20}}`;
 
   let messages;
   if (type === 'ootd') {
@@ -522,11 +548,8 @@ function PaepyeongResult() {
 
         {/* style categories + keyword */}
         <div style={{ marginTop: 18, textAlign: 'center', position: 'relative' }}>
-          <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, letterSpacing: 3, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', marginBottom: 2 }}>
-            {evalData.styleCategory} · {evalData.styleCategory2}
-          </div>
-          <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 34, letterSpacing: -0.5, lineHeight: 1, background: `linear-gradient(180deg, #fff 0%, #fff 50%, ${gradeColor} 100%)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: `drop-shadow(0 0 14px ${gradeColor}80)`, display: 'inline-block' }}>
-            "{evalData.keyword}"
+          <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 28, letterSpacing: -0.5, lineHeight: 1.2, background: `linear-gradient(180deg, #fff 0%, #fff 50%, ${gradeColor} 100%)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: `drop-shadow(0 0 14px ${gradeColor}80)`, display: 'inline-block' }}>
+            {evalData.naming}
           </div>
           <div style={{ marginTop: 10, display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 4 }}>
             <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 54, color: gradeColor, textShadow: `0 0 12px ${gradeColor}e6, 0 0 24px ${gradeColor}80, 3px 3px 0 rgba(0,0,0,0.8), -1px -1px 0 #fff`, letterSpacing: 2, lineHeight: 1 }}>{String(score).padStart(2, '0')}</span>
@@ -569,16 +592,11 @@ function PaepyeongResult() {
           </div>
         </div>
 
-        {/* improvements */}
-        {evalData.improvements && evalData.improvements.length > 0 && (
-          <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12 }}>
-            <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 1.5, marginBottom: 10 }}>★ IMPROVEMENTS</div>
-            {evalData.improvements.map((tip, i) => (
-              <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: i < evalData.improvements.length - 1 ? 8 : 0 }}>
-                <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: gradeColor, flexShrink: 0, marginTop: 2 }}>{i + 1}</span>
-                <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>{tip}</span>
-              </div>
-            ))}
+        {/* nudge */}
+        {evalData.nudge && (
+          <div style={{ padding: '12px 14px', background: `linear-gradient(135deg, ${gradeColor}0f, rgba(255,255,255,0.02))`, border: `1px solid ${gradeColor}40`, borderRadius: 12, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <span style={{ fontSize: 18, flexShrink: 0 }}>💡</span>
+            <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6 }}>{evalData.nudge}</span>
           </div>
         )}
 
