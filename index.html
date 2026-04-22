@@ -277,9 +277,13 @@ function MiniSpark({ color = '#3DFFA6', size = 8, style = {} }) {
 // IMAGE COMPRESSION — Canvas 리사이즈 + JPEG 압축 (413 방지)
 // ═══════════════════════════════════════════════════════════════
 
-function compressImage(file, maxSize = 800, quality = 0.7) {
-  return new Promise((resolve) => {
+// maxSize 512px + 장당 base64 400KB 상한 보장
+// → 3장 합계 최대 ~1.2MB, Vercel 4.5MB 제한 안전하게 통과
+function compressImage(file, maxSize = 512, quality = 0.65) {
+  return new Promise((resolve, reject) => {
+    const objUrl = URL.createObjectURL(file);
     const img = new Image();
+    img.onerror = () => { URL.revokeObjectURL(objUrl); reject(new Error('이미지 로드 실패')); };
     img.onload = () => {
       let w = img.width, h = img.height;
       if (w > maxSize || h > maxSize) {
@@ -290,10 +294,21 @@ function compressImage(file, maxSize = 800, quality = 0.7) {
       canvas.width = w;
       canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      URL.revokeObjectURL(img.src);
-      resolve(canvas.toDataURL('image/jpeg', quality));
+      URL.revokeObjectURL(objUrl);
+
+      // 장당 base64 상한: 400KB (3장 × 400KB = 1.2MB ≪ 4.5MB 제한)
+      const MAX_B64 = 400 * 1024;
+      let q = quality;
+      let dataUrl;
+      do {
+        dataUrl = canvas.toDataURL('image/jpeg', q);
+        if (dataUrl.length <= MAX_B64 || q <= 0.3) break;
+        q = Math.round((q - 0.1) * 10) / 10;
+      } while (true);
+
+      resolve(dataUrl);
     };
-    img.src = URL.createObjectURL(file);
+    img.src = objUrl;
   });
 }
 
