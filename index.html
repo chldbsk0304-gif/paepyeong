@@ -274,6 +274,30 @@ function MiniSpark({ color = '#3DFFA6', size = 8, style = {} }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// IMAGE COMPRESSION — Canvas 리사이즈 + JPEG 압축 (413 방지)
+// ═══════════════════════════════════════════════════════════════
+
+function compressImage(file, maxSize = 800, quality = 0.7) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if (w > maxSize || h > maxSize) {
+        if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+        else        { w = Math.round(w * maxSize / h); h = maxSize; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(img.src);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
 // SCREEN 01 — ONBOARDING
 // ═══════════════════════════════════════════════════════════════
 
@@ -281,15 +305,11 @@ function UploadSlot({ index, imageData, onFileSelect, big = false }) {
   const fileRef = useRef(null);
   const filled = !!imageData;
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const dataUrl = ev.target.result;
-      onFileSelect({ base64: dataUrl.split(',')[1], mediaType: file.type || 'image/jpeg', previewUrl: dataUrl });
-    };
-    reader.readAsDataURL(file);
+    const dataUrl = await compressImage(file);
+    onFileSelect({ base64: dataUrl.split(',')[1], mediaType: 'image/jpeg', previewUrl: dataUrl });
   };
 
   return (
@@ -1335,16 +1355,11 @@ function OotdUploadPanel({ onEvaluate }) {
   const [imageData, setImageData] = useState(null);
   const fileInputRef = useRef(null);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const mediaType = file.type || 'image/jpeg';
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const dataUrl = ev.target.result;
-      setImageData({ base64: dataUrl.split(',')[1], mediaType, previewUrl: dataUrl });
-    };
-    reader.readAsDataURL(file);
+    const dataUrl = await compressImage(file);
+    setImageData({ base64: dataUrl.split(',')[1], mediaType: 'image/jpeg', previewUrl: dataUrl });
   };
 
   return (
