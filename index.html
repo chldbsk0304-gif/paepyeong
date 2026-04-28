@@ -255,8 +255,8 @@ function IOSDevice({ children, dark = false }) {
 function Sparkle({ size = 14, color = '#3DFFA6', style = {}, delay = 0 }) {
   return (
     <div style={{ position: 'absolute', width: size, height: size, pointerEvents: 'none', animation: `ppTwinkle 2.4s ${delay}s ease-in-out infinite`, ...style }}>
-      <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 2, transform: 'translateX(-50%)', background: `linear-gradient(to bottom, transparent, ${color}, transparent)`, borderRadius: 2 }}/>
-      <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 2, transform: 'translateY(-50%)', background: `linear-gradient(to right, transparent, ${color}, transparent)`, borderRadius: 2 }}/>
+      <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 2, transform: 'translateX(-50%)', background: color, borderRadius: 2 }}/>
+      <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 2, transform: 'translateY(-50%)', background: color, borderRadius: 2 }}/>
       <div style={{ position: 'absolute', left: '50%', top: '50%', width: size * 0.32, height: size * 0.32, transform: 'translate(-50%, -50%)', background: color, borderRadius: '50%', boxShadow: `0 0 ${size * 0.6}px ${color}` }}/>
     </div>
   );
@@ -331,22 +331,21 @@ function UploadSlot({ index, imageData, onFileSelect, big = false }) {
   return (
     <button onClick={() => fileRef.current && fileRef.current.click()} style={{ position: 'relative', width: '100%', aspectRatio: big ? '2 / 1' : '1 / 1', border: 'none', padding: 0, background: 'transparent', cursor: 'pointer', outline: 'none' }}>
       <input ref={fileRef} type="file" accept="image/*" onChange={handleChange} style={{ display: 'none' }}/>
-      <div style={{ position: 'absolute', inset: 0, borderRadius: 18, padding: 2, background: filled ? 'linear-gradient(135deg, #fff 0%, #3DFFA6 30%, #25d688 50%, #3DFFA6 70%, #fff 100%)' : 'linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(61,255,166,0.35) 50%, rgba(255,255,255,0.2) 100%)' }}>
+      <div style={{ position: 'absolute', inset: 0, borderRadius: 18, padding: 2, background: filled ? '#3DFFA6' : 'rgba(61,255,166,0.3)' }}>
         <div style={{ width: '100%', height: '100%', borderRadius: 16, background: 'rgba(255,255,255,0.03)', border: filled ? 'none' : '1.5px dashed rgba(61,255,166,0.55)', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: filled ? 'inset 0 0 30px rgba(61,255,166,0.3), 0 0 20px rgba(61,255,166,0.35)' : 'inset 0 0 20px rgba(61,255,166,0.08)' }}>
           {!filled && <div style={{ position: 'absolute', inset: 6, borderRadius: 12, border: '1px dashed rgba(255,255,255,0.15)' }}/>}
           {filled ? (
             <>
               <img src={imageData.previewUrl} alt={`OOTD ${index + 1}`} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: 16 }}/>
-              <div style={{ position: 'absolute', top: 8, right: 8, width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(135deg, #fff 0%, #3DFFA6 50%, #25d688 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 12px rgba(61,255,166,0.8)', zIndex: 1 }}>
+              <div style={{ position: 'absolute', top: 8, right: 8, width: 26, height: 26, borderRadius: '50%', background: '#3DFFA6', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="#1A1A1A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </div>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40%', background: 'linear-gradient(to bottom, rgba(0,0,0,0.3), transparent)', pointerEvents: 'none', borderRadius: '16px 16px 0 0', zIndex: 1 }}/>
             </>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, position: 'relative', zIndex: 2 }}>
               <div style={{ width: 36, height: 36, position: 'relative' }}>
-                <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 3, transform: 'translateY(-50%)', background: 'linear-gradient(to right, transparent, #3DFFA6, transparent)', borderRadius: 3, boxShadow: '0 0 8px #3DFFA6' }}/>
-                <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 3, transform: 'translateX(-50%)', background: 'linear-gradient(to bottom, transparent, #3DFFA6, transparent)', borderRadius: 3, boxShadow: '0 0 8px #3DFFA6' }}/>
+                <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 3, transform: 'translateY(-50%)', background: '#3DFFA6', borderRadius: 3 }}/>
+                <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 3, transform: 'translateX(-50%)', background: '#3DFFA6', borderRadius: 3 }}/>
               </div>
               <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: 'rgba(255,255,255,0.45)', letterSpacing: 1 }}>{String(index + 1).padStart(2, '0')}</div>
             </div>
@@ -383,9 +382,7 @@ function PaepyeongOnboarding() {
 
   return (
     <div style={{ width: '100%', height: '100%', background: '#1A1A1A', position: 'relative', overflow: 'hidden', fontFamily: '"Space Grotesk", sans-serif', color: '#fff', animation: 'ppSlideInLeft 0.35s ease' }}>
-      <div style={{ position: 'absolute', top: '-20%', left: '-10%', width: '80%', height: '60%', background: 'radial-gradient(circle, rgba(61,255,166,0.18) 0%, transparent 60%)', pointerEvents: 'none' }}/>
-      <div style={{ position: 'absolute', bottom: '-10%', right: '-15%', width: '70%', height: '50%', background: 'radial-gradient(circle, rgba(255,61,220,0.12) 0%, transparent 60%)', pointerEvents: 'none' }}/>
-      <div style={{ position: 'absolute', inset: 0, opacity: 0.25, backgroundImage: `linear-gradient(rgba(61,255,166,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(61,255,166,0.08) 1px, transparent 1px)`, backgroundSize: '32px 32px', maskImage: 'radial-gradient(ellipse at 50% 40%, black 30%, transparent 80%)', WebkitMaskImage: 'radial-gradient(ellipse at 50% 40%, black 30%, transparent 80%)', pointerEvents: 'none' }}/>
+
       <Sparkle size={18} color="#3DFFA6" style={{ top: 90, right: 24 }} delay={0}/>
       <Sparkle size={12} color="#fff" style={{ top: 130, right: 56 }} delay={0.6}/>
       <Sparkle size={22} color="#3DFFA6" style={{ top: 160, left: 18 }} delay={1.2}/>
@@ -400,7 +397,7 @@ function PaepyeongOnboarding() {
           </div>
           <div style={{ display: 'flex', gap: 4, height: 14, padding: 2, borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(61,255,166,0.25)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.5)' }}>
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} style={{ flex: 1, borderRadius: 4, background: i < filledCount ? 'linear-gradient(to bottom, #fff 0%, #3DFFA6 40%, #25d688 100%)' : 'rgba(255,255,255,0.06)', boxShadow: i < filledCount ? '0 0 10px rgba(61,255,166,0.9), inset 0 1px 1px rgba(255,255,255,0.7)' : 'inset 0 1px 2px rgba(0,0,0,0.4)', transition: 'all 0.3s ease' }}/>
+              <div key={i} style={{ flex: 1, borderRadius: 4, background: i < filledCount ? '#3DFFA6' : 'rgba(255,255,255,0.06)', transition: 'all 0.3s ease' }}/>
             ))}
           </div>
         </div>
@@ -408,13 +405,13 @@ function PaepyeongOnboarding() {
         {/* title */}
         <div style={{ marginTop: 28, marginBottom: 22 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999, background: 'linear-gradient(135deg, rgba(61,255,166,0.15), rgba(61,255,166,0.05))', border: '1px solid rgba(61,255,166,0.35)', boxShadow: '0 0 12px rgba(61,255,166,0.2)' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999, background: 'rgba(61,255,166,0.1)', border: '1px solid rgba(61,255,166,0.35)' }}>
               <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: '#3DFFA6', letterSpacing: 1 }}>✦ OOTD UPLOAD ✦</span>
             </div>
           </div>
           <h1 style={{ margin: 0, fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 26, lineHeight: 1.25, letterSpacing: -0.5, color: '#fff' }}>
             나를 표현할<br/>
-            <span style={{ background: 'linear-gradient(90deg, #fff 0%, #3DFFA6 50%, #fff 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: 'drop-shadow(0 0 12px rgba(61,255,166,0.4))' }}>전신 OOTD 3장</span>을<br/>
+            <span style={{ color: '#3DFFA6' }}>전신 OOTD 3장</span>을<br/>
             업로드해 주세요
           </h1>
           <p style={{ margin: '10px 0 0', fontSize: 13, lineHeight: 1.5, color: 'rgba(255,255,255,0.55)' }}>최근 6개월 이내 사진을 추천해요 · 얼굴이 보이지 않아도 OK</p>
@@ -432,14 +429,13 @@ function PaepyeongOnboarding() {
         </div>
 
         {/* CTA */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 22px 28px', background: 'linear-gradient(180deg, transparent 0%, rgba(26,26,26,0.85) 25%, #1A1A1A 60%)', backdropFilter: 'blur(8px)' }}>
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 22px 28px', background: '#1A1A1A' }}>
           <Sparkle size={14} color="#fff" style={{ top: 0, right: 32 }} delay={0.4}/>
           <button
             onClick={handleContinue}
             disabled={filledCount < 3}
-            style={{ width: '100%', height: 58, border: 'none', borderRadius: 999, padding: 2, background: filledCount >= 3 ? 'linear-gradient(135deg, #fff 0%, #3DFFA6 25%, #25d688 50%, #3DFFA6 75%, #fff 100%)' : 'linear-gradient(135deg, rgba(255,255,255,0.15), rgba(61,255,166,0.2), rgba(255,255,255,0.1))', cursor: filledCount >= 3 ? 'pointer' : 'not-allowed', boxShadow: filledCount >= 3 ? '0 0 24px rgba(61,255,166,0.8), 0 6px 20px rgba(61,255,166,0.35)' : '0 4px 12px rgba(0,0,0,0.4)', transition: 'all 0.3s ease' }}>
-            <div style={{ width: '100%', height: '100%', borderRadius: 999, background: filledCount >= 3 ? 'linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(61,255,166,0.95) 45%, #25d688 100%)' : 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 17, letterSpacing: 0.5, color: filledCount >= 3 ? '#0a2a18' : 'rgba(255,255,255,0.4)', position: 'relative', overflow: 'hidden' }}>
-              {filledCount >= 3 && <div style={{ position: 'absolute', top: 0, bottom: '50%', left: 0, right: 0, background: 'linear-gradient(180deg, rgba(255,255,255,0.5), transparent)', borderRadius: '999px 999px 0 0', pointerEvents: 'none' }}/>}
+            style={{ width: '100%', height: 58, border: 'none', borderRadius: 999, padding: 2, background: filledCount >= 3 ? '#3DFFA6' : 'rgba(255,255,255,0.08)', cursor: filledCount >= 3 ? 'pointer' : 'not-allowed', boxShadow: filledCount >= 3 ? '0 0 24px rgba(61,255,166,0.8), 0 6px 20px rgba(61,255,166,0.35)' : '0 4px 12px rgba(0,0,0,0.4)', transition: 'all 0.3s ease' }}>
+            <div style={{ width: '100%', height: '100%', borderRadius: 999, background: filledCount >= 3 ? '#3DFFA6' : '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 17, letterSpacing: 0.5, color: filledCount >= 3 ? '#0a2a18' : 'rgba(255,255,255,0.4)', position: 'relative', overflow: 'hidden' }}>
               <span style={{ position: 'relative', zIndex: 2 }}>평가 받기</span>
               <span style={{ position: 'relative', zIndex: 2, fontSize: 18 }}>▸</span>
             </div>
@@ -505,8 +501,7 @@ function StatBar({ label, value, max = 10, color, delay = 0 }) {
           {Array.from({ length: max - 1 }).map((_, i) => <div key={i} style={{ flex: 1, borderRight: '1px dashed rgba(0,0,0,0.5)' }}/>)}
           <div style={{ flex: 1 }}/>
         </div>
-        <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: `${w}%`, background: `linear-gradient(180deg, rgba(255,255,255,0.7) 0%, ${color} 30%, ${color} 70%, rgba(0,0,0,0.2) 100%)`, boxShadow: `0 0 10px ${color}cc`, borderRadius: 2, transition: 'width 1.1s cubic-bezier(0.22, 1, 0.36, 1)' }}/>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(to bottom, rgba(255,255,255,0.35), transparent)', pointerEvents: 'none' }}/>
+        <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: `${w}%`, background: color, boxShadow: `0 0 8px ${color}99`, borderRadius: 2, transition: 'width 1.1s cubic-bezier(0.22, 1, 0.36, 1)' }}/>
       </div>
       <div style={{ width: 36, textAlign: 'right', fontFamily: '"Press Start 2P", monospace', fontSize: 11, color, textShadow: `0 0 6px ${color}aa` }}>{String(displayValue).padStart(2, '0')}</div>
     </div>
@@ -516,8 +511,8 @@ function StatBar({ label, value, max = 10, color, delay = 0 }) {
 function GradeBadge({ letter, active, color }) {
   return (
     <div style={{ flex: 1, aspectRatio: '1', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: active ? 'scale(1.1)' : 'none', transition: 'all 0.3s ease' }}>
-      <div style={{ position: 'absolute', inset: 0, borderRadius: 12, padding: active ? 2 : 1, background: active ? `linear-gradient(135deg, #fff, ${color}, #fff, ${color})` : 'rgba(255,255,255,0.12)', boxShadow: active ? `0 0 16px ${color}cc, 0 0 32px ${color}66` : 'none' }}>
-        <div style={{ width: '100%', height: '100%', borderRadius: 11, background: active ? `radial-gradient(circle at 30% 25%, ${color}44 0%, #1a0a14 70%)` : 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Press Start 2P", monospace', fontSize: active ? 22 : 15, color: active ? '#fff' : 'rgba(255,255,255,0.3)', textShadow: active ? `0 0 12px ${color}, 0 0 24px ${color}88, 2px 2px 0 rgba(0,0,0,0.8)` : 'none', letterSpacing: 1 }}>{letter}</div>
+      <div style={{ position: 'absolute', inset: 0, borderRadius: 12, padding: active ? 2 : 1, background: active ? color : 'rgba(255,255,255,0.12)', boxShadow: active ? `0 0 16px ${color}cc, 0 0 32px ${color}66` : 'none' }}>
+        <div style={{ width: '100%', height: '100%', borderRadius: 11, background: active ? '#1a0a14' : 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Press Start 2P", monospace', fontSize: active ? 22 : 15, color: active ? '#fff' : 'rgba(255,255,255,0.3)', textShadow: active ? `0 0 12px ${color}, 0 0 24px ${color}88, 2px 2px 0 rgba(0,0,0,0.8)` : 'none', letterSpacing: 1 }}>{letter}</div>
       </div>
       {active && (
         <>
@@ -574,16 +569,14 @@ function PaepyeongResult() {
 
   return (
     <div style={{ width: '100%', height: '100%', background: '#1A1A1A', position: 'relative', overflow: 'hidden', fontFamily: '"Space Grotesk", sans-serif', color: '#fff', animation: 'ppSlideIn 0.35s ease' }}>
-      <div style={{ position: 'absolute', top: '-15%', left: '-20%', width: '80%', height: '50%', background: `radial-gradient(circle, ${gradeColor}33 0%, transparent 65%)`, pointerEvents: 'none' }}/>
-      <div style={{ position: 'absolute', bottom: '-10%', right: '-20%', width: '80%', height: '50%', background: 'radial-gradient(circle, rgba(61,255,166,0.13) 0%, transparent 65%)', pointerEvents: 'none' }}/>
-      <div style={{ position: 'absolute', inset: 0, opacity: 0.18, backgroundImage: `linear-gradient(${gradeColor}1a 1px, transparent 1px), linear-gradient(90deg, rgba(61,255,166,0.1) 1px, transparent 1px)`, backgroundSize: '28px 28px', maskImage: 'radial-gradient(ellipse at 50% 30%, black 20%, transparent 75%)', WebkitMaskImage: 'radial-gradient(ellipse at 50% 30%, black 20%, transparent 75%)' }}/>
+
       <Sparkle size={18} color={gradeColor} style={{ top: 72, right: 22 }} delay={0}/>
       <Sparkle size={12} color="#fff" style={{ top: 110, left: 28 }} delay={0.6}/>
       <Sparkle size={20} color="#3DFFA6" style={{ top: 380, right: 14 }} delay={1.1}/>
 
       <div style={{ position: 'relative', zIndex: 2, height: '100%', display: 'flex', flexDirection: 'column', padding: '70px 22px 28px', boxSizing: 'border-box', overflowY: 'auto' }}>
         {/* RESULT badge */}
-        <div style={{ alignSelf: 'center', display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px 5px', borderRadius: 999, background: `linear-gradient(135deg, ${gradeColor}40, ${gradeColor}14)`, border: `1px solid ${gradeColor}99`, boxShadow: `0 0 16px ${gradeColor}59` }}>
+        <div style={{ alignSelf: 'center', display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px 5px', borderRadius: 999, background: `${gradeColor}1e`, border: `1px solid ${gradeColor}99`, boxShadow: `0 0 16px ${gradeColor}59` }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: gradeColor, boxShadow: `0 0 8px ${gradeColor}`, animation: 'ppBlink 1.2s ease-in-out infinite' }}/>
           <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 10, color: '#fff', letterSpacing: 3, textShadow: `0 0 8px ${gradeColor}cc` }}>RESULT</span>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: gradeColor, boxShadow: `0 0 8px ${gradeColor}`, animation: 'ppBlink 1.2s 0.6s ease-in-out infinite' }}/>
@@ -619,7 +612,7 @@ function PaepyeongResult() {
 
         {/* naming */}
         <div style={{ marginTop: 20, textAlign: 'center', position: 'relative' }}>
-          <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 28, letterSpacing: -0.5, lineHeight: 1.2, background: `linear-gradient(180deg, #fff 0%, #fff 50%, ${gradeColor} 100%)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: `drop-shadow(0 0 14px ${gradeColor}80)`, display: 'inline-block' }}>
+          <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 28, letterSpacing: -0.5, lineHeight: 1.2, color: '#fff', filter: `drop-shadow(0 0 14px ${gradeColor}80)`, display: 'inline-block' }}>
             {evalData.naming}
           </div>
           <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
@@ -641,14 +634,14 @@ function PaepyeongResult() {
         </div>
 
         {/* one-liner */}
-        <div style={{ marginTop: 20, padding: '20px 16px', background: `linear-gradient(135deg, ${gradeColor}1f, ${gradeColor}05)`, border: `1px solid ${gradeColor}59`, borderRadius: 12, textAlign: 'center', position: 'relative' }}>
+        <div style={{ marginTop: 20, padding: '20px 16px', background: `${gradeColor}12`, border: `1px solid ${gradeColor}59`, borderRadius: 12, textAlign: 'center', position: 'relative' }}>
           <div style={{ position: 'absolute', top: -8, left: 14, fontFamily: '"Press Start 2P", monospace', fontSize: 7, letterSpacing: 1.5, color: gradeColor, background: '#1A1A1A', padding: '2px 6px' }}>★ ONE LINE</div>
           <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 18, letterSpacing: -0.3, color: '#fff', textShadow: `0 0 14px ${gradeColor}80`, lineHeight: 1.5 }}>"{evalData.oneLiner}"</div>
         </div>
 
         {/* AI summary */}
         <div style={{ marginTop: 20, padding: '14px 14px', background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(61,255,166,0.3)', borderRadius: 10, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-          <div style={{ flexShrink: 0, width: 28, height: 28, borderRadius: 6, background: 'linear-gradient(135deg, #3DFFA6, #25d688)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 10px rgba(61,255,166,0.5)', fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: '#0a2a18' }}>AI</div>
+          <div style={{ flexShrink: 0, width: 28, height: 28, borderRadius: 6, background: '#3DFFA6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: '#0a2a18' }}>AI</div>
           <div style={{ flex: 1, fontFamily: '"Space Grotesk", sans-serif', fontSize: 12.5, lineHeight: 1.8, color: 'rgba(255,255,255,0.75)' }}>{evalData.summary}</div>
         </div>
 
@@ -659,7 +652,7 @@ function PaepyeongResult() {
 
         {/* nudge */}
         {evalData.nudge && (
-          <div style={{ marginTop: 20, padding: '12px 14px', background: `linear-gradient(135deg, ${gradeColor}0f, rgba(255,255,255,0.02))`, border: `1px solid ${gradeColor}40`, borderRadius: 12, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+          <div style={{ marginTop: 20, padding: '12px 14px', background: `${gradeColor}0c`, border: `1px solid ${gradeColor}40`, borderRadius: 12, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
             <span style={{ fontSize: 18, flexShrink: 0 }}>💡</span>
             <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6 }}>{evalData.nudge}</span>
           </div>
@@ -667,9 +660,8 @@ function PaepyeongResult() {
 
         {/* buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
-          <button onClick={() => history.push('/feed')} style={{ width: '100%', height: 54, border: 'none', borderRadius: 999, padding: 2, background: 'linear-gradient(135deg, #fff 0%, #3DFFA6 25%, #25d688 50%, #3DFFA6 75%, #fff 100%)', cursor: 'pointer', boxShadow: '0 0 22px rgba(61,255,166,0.65), 0 6px 18px rgba(61,255,166,0.3)' }}>
-            <div style={{ width: '100%', height: '100%', borderRadius: 999, background: 'linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(61,255,166,0.95) 45%, #25d688 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 15, color: '#0a2a18', textShadow: '0 1px 0 rgba(255,255,255,0.5)', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: 0, bottom: '50%', left: 0, right: 0, background: 'linear-gradient(180deg, rgba(255,255,255,0.5), transparent)', borderRadius: '999px 999px 0 0' }}/>
+          <button onClick={() => history.push('/feed')} style={{ width: '100%', height: 54, border: 'none', borderRadius: 999, padding: 2, background: '#3DFFA6', cursor: 'pointer' }}>
+            <div style={{ width: '100%', height: '100%', borderRadius: 999, background: '#3DFFA6', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 15, color: '#0a2a18' }}>
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style={{ position: 'relative', zIndex: 2 }}>
                 <path d="M12 5a2 2 0 100-4 2 2 0 000 4zM12 15a2 2 0 100-4 2 2 0 000 4zM4 10a2 2 0 100-4 2 2 0 000 4z" fill="#0a2a18"/>
                 <path d="M10.5 4L5.5 7M10.5 12L5.5 9" stroke="#0a2a18" strokeWidth="1.5"/>
@@ -677,7 +669,7 @@ function PaepyeongResult() {
               <span style={{ position: 'relative', zIndex: 2 }}>퍼블릭쇼룸에 공유</span>
             </div>
           </button>
-          <button onClick={() => history.push('/paepyeong')} style={{ width: '100%', height: 48, border: `1.5px solid ${gradeColor}80`, borderRadius: 999, background: `linear-gradient(180deg, ${gradeColor}1f, ${gradeColor}0a)`, cursor: 'pointer', boxShadow: `0 0 14px ${gradeColor}33`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Space Grotesk", sans-serif', fontWeight: 600, fontSize: 14, color: '#fff' }}>
+          <button onClick={() => history.push('/paepyeong')} style={{ width: '100%', height: 48, border: `1.5px solid ${gradeColor}80`, borderRadius: 999, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Space Grotesk", sans-serif', fontWeight: 600, fontSize: 14, color: '#fff' }}>
             다시 평가받기
           </button>
         </div>
@@ -694,8 +686,8 @@ function Avatar({ name, size = 46, ring = false }) {
   const hues = [210, 340, 160, 40, 280, 20, 190];
   const h = hues[(name.charCodeAt(0) + (name.charCodeAt(1) || 0)) % hues.length];
   return (
-    <div style={{ width: size, height: size, borderRadius: '50%', padding: ring ? 2 : 0, background: ring ? 'linear-gradient(135deg, #3DFFA6, #25d688, #fff, #3DFFA6)' : 'transparent', flexShrink: 0 }}>
-      <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: `repeating-linear-gradient(45deg, hsl(${h}, 55%, 78%) 0px, hsl(${h}, 55%, 78%) 4px, hsl(${h}, 55%, 90%) 4px, hsl(${h}, 55%, 90%) 8px)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"JetBrains Mono", monospace', fontSize: size * 0.34, fontWeight: 700, color: `hsl(${h}, 55%, 28%)`, border: ring ? '2px solid #fff' : '1px solid rgba(0,0,0,0.08)' }}>
+    <div style={{ width: size, height: size, borderRadius: '50%', padding: ring ? 2 : 0, background: ring ? '#3DFFA6' : 'transparent', flexShrink: 0 }}>
+      <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: `hsl(${h}, 55%, 83%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"JetBrains Mono", monospace', fontSize: size * 0.34, fontWeight: 700, color: `hsl(${h}, 55%, 28%)`, border: ring ? '2px solid #fff' : '1px solid rgba(0,0,0,0.08)' }}>
         {name[0]}
       </div>
     </div>
@@ -706,8 +698,7 @@ function OOTDPlaceholder({ seed, tall = false }) {
   const hues = [[200, 320], [340, 40], [160, 210], [20, 280], [280, 60]];
   const [h1, h2] = hues[seed % hues.length];
   return (
-    <div style={{ width: '100%', aspectRatio: tall ? '4 / 5' : '1 / 1', borderRadius: 14, position: 'relative', overflow: 'hidden', background: `linear-gradient(135deg, hsl(${h1}, 50%, 88%), hsl(${h2}, 45%, 78%))` }}>
-      <div style={{ position: 'absolute', inset: 0, background: `repeating-linear-gradient(45deg, rgba(255,255,255,0.2) 0px, rgba(255,255,255,0.2) 3px, transparent 3px, transparent 14px)` }}/>
+    <div style={{ width: '100%', aspectRatio: tall ? '4 / 5' : '1 / 1', borderRadius: 14, position: 'relative', overflow: 'hidden', background: `hsl(${h1}, 50%, 88%)` }}>
       <div style={{ position: 'absolute', bottom: 10, left: 10, padding: '3px 7px', background: 'rgba(255,255,255,0.85)', borderRadius: 4, fontFamily: '"JetBrains Mono", monospace', fontSize: 9, letterSpacing: 1, color: '#1A1A1A' }}>OOTD_{String(seed + 1).padStart(2, '0')}</div>
     </div>
   );
@@ -717,7 +708,7 @@ function ScoreBadge({ score }) {
   const tier = score >= 80 ? '#3DFFA6' : score >= 50 ? '#FFB83D' : '#FF6EAF';
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px 5px 7px', background: '#1A1A1A', borderRadius: 999, border: `1.5px solid ${tier}`, boxShadow: `0 0 10px ${tier}55` }}>
-      <div style={{ width: 16, height: 16, borderRadius: '50%', background: `linear-gradient(135deg, #fff, ${tier})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Press Start 2P", monospace', fontSize: 6, color: '#1A1A1A' }}>AI</div>
+      <div style={{ width: 16, height: 16, borderRadius: '50%', background: tier, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Press Start 2P", monospace', fontSize: 6, color: '#1A1A1A' }}>AI</div>
       <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 10, color: tier, textShadow: `0 0 6px ${tier}88` }}>{score}</span>
     </div>
   );
@@ -725,7 +716,7 @@ function ScoreBadge({ score }) {
 
 function LevelChip({ title, lv }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 7px', background: 'linear-gradient(180deg, #fff, #F0FFF6)', border: '1px solid #3DFFA6', borderRadius: 4, fontFamily: '"Space Grotesk", sans-serif', fontSize: 10, fontWeight: 600, color: '#0a6b3e', boxShadow: '0 1px 0 rgba(61,255,166,0.3)', whiteSpace: 'nowrap' }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 7px', background: '#fff', border: '1px solid #3DFFA6', borderRadius: 4, fontFamily: '"Space Grotesk", sans-serif', fontSize: 10, fontWeight: 600, color: '#0a6b3e', boxShadow: '0 1px 0 rgba(61,255,166,0.3)', whiteSpace: 'nowrap' }}>
       <span style={{ fontSize: 8 }}>✦</span>{title}<span style={{ color: '#1A1A1A' }}>·lv.{lv}</span>
     </span>
   );
@@ -885,7 +876,7 @@ function PaepyeongFeed() {
           const color = t.primary ? '#3DFFA6' : (isOn ? '#1A1A1A' : '#b8b8b8');
           return (
             <button key={t.key} style={{ flex: 1, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '4px 4px' }}>
-              {t.primary ? <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #fff 0%, #3DFFA6 60%, #25d688 100%)', boxShadow: '0 4px 14px rgba(61,255,166,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: -16, border: '3px solid #fff' }}>{t.icon('#1A1A1A')}</div> : t.icon(color)}
+              {t.primary ? <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#3DFFA6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: -16, border: '3px solid #fff' }}>{t.icon('#1A1A1A')}</div> : t.icon(color)}
               <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 10.5, fontWeight: isOn ? 700 : 500, color: isOn ? '#1A1A1A' : '#9a9a9a', marginTop: t.primary ? 2 : 0 }}>{t.key}</span>
             </button>
           );
@@ -911,9 +902,8 @@ function OutfitImg({ seed, label, winning }) {
   const palettes = [[['#2a1f3d', '#4a2f6d'], '#ff6eaf'], [['#0d3d2e', '#1a6b52'], '#3dffa6']];
   const [[c1, c2], accent] = palettes[seed % palettes.length];
   return (
-    <div style={{ width: '100%', aspectRatio: '3 / 4.2', borderRadius: 12, position: 'relative', overflow: 'hidden', background: `linear-gradient(160deg, ${c1}, ${c2})`, boxShadow: winning ? `0 0 0 2px ${accent}, 0 0 24px ${accent}66` : 'inset 0 0 0 1px rgba(255,255,255,0.08)', transition: 'box-shadow 0.4s ease' }}>
-      <div style={{ position: 'absolute', inset: 0, background: `repeating-linear-gradient(45deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 2px, transparent 2px, transparent 12px)` }}/>
-      <div style={{ position: 'absolute', left: '22%', right: '22%', top: '18%', bottom: '14%', background: `repeating-linear-gradient(135deg, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.12) 4px, rgba(0,0,0,0.12) 4px, rgba(0,0,0,0.12) 10px)`, borderRadius: 8, border: '1px dashed rgba(255,255,255,0.2)' }}/>
+    <div style={{ width: '100%', aspectRatio: '3 / 4.2', borderRadius: 12, position: 'relative', overflow: 'hidden', background: c1, boxShadow: winning ? `0 0 0 2px ${accent}, 0 0 24px ${accent}66` : 'inset 0 0 0 1px rgba(255,255,255,0.08)', transition: 'box-shadow 0.4s ease' }}>
+      <div style={{ position: 'absolute', left: '22%', right: '22%', top: '18%', bottom: '14%', background: 'rgba(255,255,255,0.08)', borderRadius: 8, border: '1px dashed rgba(255,255,255,0.2)' }}/>
       <div style={{ position: 'absolute', top: 8, left: 8, width: 28, height: 28, borderRadius: 6, background: winning ? accent : 'rgba(0,0,0,0.55)', border: winning ? 'none' : `1.5px solid ${accent}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Press Start 2P", monospace', fontSize: 11, color: winning ? '#1A1A1A' : accent, boxShadow: winning ? `0 0 10px ${accent}` : 'none' }}>{label}</div>
       <div style={{ position: 'absolute', bottom: 6, right: 8, fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: 'rgba(255,255,255,0.55)', letterSpacing: 1 }}>LOOK_{label}</div>
     </div>
@@ -923,8 +913,7 @@ function OutfitImg({ seed, label, winning }) {
 function ProductChip({ brand, name, hue }) {
   return (
     <div style={{ flexShrink: 0, width: 108, display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <div style={{ width: 108, height: 108, borderRadius: 10, background: `linear-gradient(135deg, hsl(${hue},40%,28%), hsl(${hue + 30},45%,18%))`, border: '1px solid rgba(255,255,255,0.08)', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: '25%', background: `repeating-linear-gradient(90deg, rgba(255,255,255,0.15) 0 2px, transparent 2px 6px)`, borderRadius: 4 }}/>
+      <div style={{ width: 108, height: 108, borderRadius: 10, background: `hsl(${hue},40%,25%)`, border: '1px solid rgba(255,255,255,0.08)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', bottom: 4, left: 6, fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: 'rgba(255,255,255,0.6)', letterSpacing: 0.5 }}>IMG</div>
       </div>
       <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 7, color: '#3DFFA6', letterSpacing: 1 }}>{brand}</div>
@@ -938,7 +927,7 @@ function CommentRow({ c }) {
   const [likes, setLikes] = useState(c.likes);
   return (
     <div style={{ display: 'flex', gap: 10, padding: '10px 0' }}>
-      <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: `repeating-linear-gradient(45deg, hsl(${c.hue},50%,60%) 0 3px, hsl(${c.hue},50%,75%) 3px 6px)`, border: '1px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"JetBrains Mono", monospace', fontSize: 12, fontWeight: 700, color: '#1A1A1A' }}>{c.user[0]}</div>
+      <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: `hsl(${c.hue},50%,68%)`, border: '1px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"JetBrains Mono", monospace', fontSize: 12, fontWeight: 700, color: '#1A1A1A' }}>{c.user[0]}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
           <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, fontWeight: 700, color: '#fff' }}>{c.user}</span>
@@ -990,8 +979,7 @@ function PaepyeongDetail() {
 
   return (
     <div style={{ width: '100%', height: '100%', background: '#1A1A1A', color: '#fff', fontFamily: '"Space Grotesk", sans-serif', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative', animation: 'ppSlideIn 0.35s ease' }}>
-      <div style={{ position: 'absolute', top: '-10%', left: '-20%', width: '60%', height: '40%', background: 'radial-gradient(circle, rgba(255,110,175,0.1) 0%, transparent 60%)', pointerEvents: 'none' }}/>
-      <div style={{ position: 'absolute', top: '-5%', right: '-20%', width: '60%', height: '40%', background: 'radial-gradient(circle, rgba(61,255,166,0.1) 0%, transparent 60%)', pointerEvents: 'none' }}/>
+
       <div style={{ height: 58, flexShrink: 0 }}/>
 
       {/* header */}
@@ -999,14 +987,14 @@ function PaepyeongDetail() {
         <button onClick={() => history.goBack()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
           <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M14 4l-7 7 7 7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
-        <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #ff6eaf, #ffb4d5)', border: '2px solid #3DFFA6', boxShadow: '0 0 10px rgba(61,255,166,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"JetBrains Mono", monospace', fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>y</div>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#FF6EAF', border: '2px solid #3DFFA6', boxShadow: '0 0 10px rgba(61,255,166,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"JetBrains Mono", monospace', fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>y</div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 15, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: 4 }}>
             yuna.04<span style={{ color: '#3DFFA6', fontSize: 12 }}>✓</span>
           </div>
           <div style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10.5, color: 'rgba(255,255,255,0.55)', letterSpacing: 0.3 }}>157cm · 40kg · ♀ · MZ</div>
         </div>
-        <button onClick={() => setFollowing(f => !f)} style={{ padding: '7px 14px', borderRadius: 999, background: following ? 'transparent' : 'linear-gradient(135deg, #fff, #3DFFA6 60%, #25d688)', border: following ? '1.5px solid rgba(255,255,255,0.25)' : 'none', color: following ? 'rgba(255,255,255,0.7)' : '#0a2a18', fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 12, cursor: 'pointer', boxShadow: following ? 'none' : '0 0 12px rgba(61,255,166,0.4)', letterSpacing: 0.2 }}>
+        <button onClick={() => setFollowing(f => !f)} style={{ padding: '7px 14px', borderRadius: 999, background: following ? 'transparent' : '#3DFFA6', border: following ? '1.5px solid rgba(255,255,255,0.25)' : 'none', color: following ? 'rgba(255,255,255,0.7)' : '#0a2a18', fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 12, cursor: 'pointer', boxShadow: following ? 'none' : '0 0 12px rgba(61,255,166,0.4)', letterSpacing: 0.2 }}>
           {following ? '팔로잉' : '+ 팔로우'}
         </button>
       </div>
@@ -1026,7 +1014,7 @@ function PaepyeongDetail() {
           <button onClick={() => setUserVote('B')} style={{ flex: 1, padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
             <OutfitImg seed={1} label="B" winning={userVote === 'B' || (!userVote && pctA <= 50)}/>
           </button>
-          <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', width: 44, height: 44, borderRadius: '50%', background: 'radial-gradient(circle at 30% 30%, #fff 0%, #1A1A1A 60%)', border: '2px solid #fff', boxShadow: '0 0 0 2px #1A1A1A, 0 0 14px rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Press Start 2P", monospace', fontSize: 12, color: '#1A1A1A', letterSpacing: 1, zIndex: 3 }}>VS</div>
+          <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', width: 44, height: 44, borderRadius: '50%', background: '#1A1A1A', border: '2px solid #fff', boxShadow: '0 0 0 2px #1A1A1A, 0 0 14px rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Press Start 2P", monospace', fontSize: 12, color: '#1A1A1A', letterSpacing: 1, zIndex: 3 }}>VS</div>
           <DSpark size={12} color="#FF6EAF" style={{ top: -4, left: '25%' }}/>
           <DSpark size={10} color="#3DFFA6" style={{ top: -4, right: '25%' }}/>
         </div>
@@ -1044,12 +1032,10 @@ function PaepyeongDetail() {
               </div>
             </div>
             <div style={{ height: 18, borderRadius: 4, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)', position: 'relative', overflow: 'hidden', display: 'flex' }}>
-              <div style={{ width: `${pctA}%`, background: 'linear-gradient(180deg, #ffb4d5 0%, #FF6EAF 40%, #c13e7f 100%)', transition: 'width 0.8s cubic-bezier(0.22, 1, 0.36, 1)', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(to bottom, rgba(255,255,255,0.35), transparent)' }}/>
+              <div style={{ width: `${pctA}%`, background: '#FF6EAF', transition: 'width 0.8s cubic-bezier(0.22, 1, 0.36, 1)', position: 'relative' }}>
               </div>
               <div style={{ width: 2, background: '#1A1A1A' }}/>
-              <div style={{ flex: 1, background: 'linear-gradient(180deg, #c0ffe0 0%, #3DFFA6 40%, #1a9e68 100%)', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(to bottom, rgba(255,255,255,0.35), transparent)' }}/>
+              <div style={{ flex: 1, background: '#3DFFA6', position: 'relative' }}>
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
@@ -1063,7 +1049,7 @@ function PaepyeongDetail() {
         <div style={{ marginTop: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: '#3DFFA6', letterSpacing: 1.5, textShadow: '0 0 6px rgba(61,255,166,0.5)' }}>★ USED PRODUCTS</span>
-            <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(61,255,166,0.4), transparent)' }}/>
+            <div style={{ flex: 1, height: 1, background: 'rgba(61,255,166,0.4)' }}/>
             <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>{products.length}</span>
           </div>
           <div style={{ display: 'flex', gap: 10, overflowX: 'auto', margin: '0 -14px', padding: '0 14px 6px', scrollbarWidth: 'none' }}>
@@ -1088,10 +1074,10 @@ function PaepyeongDetail() {
       </div>
 
       {/* comment input */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '10px 14px 26px', background: 'linear-gradient(180deg, rgba(26,26,26,0.6), #1A1A1A 30%)', backdropFilter: 'blur(10px)', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 10, zIndex: 4 }}>
-        <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg, #3DFFA6, #25d688)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"JetBrains Mono", monospace', fontSize: 12, fontWeight: 700, color: '#0a2a18' }}>m</div>
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '10px 14px 26px', background: '#1A1A1A', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 10, zIndex: 4 }}>
+        <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#3DFFA6', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"JetBrains Mono", monospace', fontSize: 12, fontWeight: 700, color: '#0a2a18' }}>m</div>
         <div style={{ flex: 1, height: 38, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 999, display: 'flex', alignItems: 'center', padding: '0 14px', fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>코디 의견을 남겨주세요…</div>
-        <button style={{ width: 38, height: 38, borderRadius: '50%', border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #fff, #3DFFA6 50%, #25d688)', boxShadow: '0 0 12px rgba(61,255,166,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <button style={{ width: 38, height: 38, borderRadius: '50%', border: 'none', cursor: 'pointer', background: '#3DFFA6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8l12-6-4 14-3-6-5-2z" fill="#0a2a18"/></svg>
         </button>
       </div>
@@ -1160,9 +1146,8 @@ function SharedBottomNav() {
               <>
                 <div style={{
                   width: 52, height: 52, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #fff, #3DFFA6 55%, #25d688)',
+                  background: '#3DFFA6',
                   border: `3px solid ${fabBg}`,
-                  boxShadow: '0 0 22px rgba(61,255,166,0.7), inset 1px 1px 2px rgba(255,255,255,0.7)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   marginTop: -22,
                 }}>
@@ -1428,7 +1413,7 @@ function OotdUploadPanel({ onEvaluate }) {
           style={{
             width: '100%', height: 52, borderRadius: 999, border: 'none', cursor: 'pointer',
             background: imageData
-              ? 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(61,255,166,0.95) 45%, #25d688 100%)'
+              ? '#3DFFA6'
               : 'rgba(255,255,255,0.07)',
             fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 15, fontWeight: 700,
             color: imageData ? '#0a2a18' : 'rgba(255,255,255,0.25)',
@@ -1496,7 +1481,7 @@ function WardrobeSelectPanel({ onEvaluate }) {
           style={{
             width: '100%', height: 52, borderRadius: 999, border: 'none', cursor: 'pointer',
             background: selected.length > 0
-              ? 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(61,255,166,0.95) 45%, #25d688 100%)'
+              ? '#3DFFA6'
               : 'rgba(255,255,255,0.07)',
             fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 15, fontWeight: 700,
             color: selected.length > 0 ? '#0a2a18' : 'rgba(255,255,255,0.25)',
@@ -1537,9 +1522,7 @@ function PaepyeongHub() {
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
       {/* Y2K bg layers */}
-      <div style={{ position: 'absolute', top: '-10%', right: '-15%', width: '70%', height: '45%', background: 'radial-gradient(circle, rgba(61,255,166,0.18) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }}/>
-      <div style={{ position: 'absolute', bottom: '15%', left: '-20%', width: '60%', height: '40%', background: 'radial-gradient(circle, rgba(255,110,175,0.1) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }}/>
-      <div style={{ position: 'absolute', inset: 0, opacity: 0.12, backgroundImage: 'radial-gradient(rgba(61,255,166,0.55) 1px, transparent 1px)', backgroundSize: '22px 22px', maskImage: 'radial-gradient(ellipse at 50% 0%, black 0%, transparent 70%)', WebkitMaskImage: 'radial-gradient(ellipse at 50% 0%, black 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }}/>
+
 
       {/* header + tabs — solid bg to prevent Y2K gradient bleed */}
       <div style={{ position: 'relative', zIndex: 1, background: '#0d0d0d', borderBottom: '1px solid rgba(61,255,166,0.1)', flexShrink: 0, overflow: 'hidden' }}>
@@ -1551,12 +1534,10 @@ function PaepyeongHub() {
                 <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#3DFFA6', animation: 'ppBlink 1.4s ease-in-out infinite' }}/>
                 <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 7, color: '#3DFFA6', letterSpacing: 1 }}>AI FASHION HUB</span>
               </div>
-              {/* gradient title */}
+              {/* title */}
               <span style={{
                 fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 22, fontWeight: 700, letterSpacing: -0.3,
-                background: 'linear-gradient(135deg, #fff 0%, #3DFFA6 55%, #25d688 100%)',
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                color: '#3DFFA6',
               }}>패평</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -1579,7 +1560,7 @@ function PaepyeongHub() {
               style={{
                 flex: 1, height: 44, borderRadius: 999, border: 'none', cursor: 'pointer',
                 background: mode === t.key
-                  ? 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(61,255,166,0.95) 45%, #25d688 100%)'
+                  ? '#3DFFA6'
                   : 'transparent',
                 boxShadow: mode === t.key ? '0 0 18px rgba(61,255,166,0.4)' : 'none',
                 fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 15, fontWeight: 700,
@@ -1642,7 +1623,7 @@ function TrendPersonCard({ user, hot }) {
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7, flexShrink: 0, cursor: 'pointer' }}>
       <div style={{
         width: 64, height: 90, borderRadius: 22, overflow: 'hidden',
-        background: `linear-gradient(160deg, ${hue}ee 0%, ${hue}99 100%)`,
+        background: hue,
         border: '1.5px solid rgba(255,255,255,0.15)', position: 'relative',
         boxShadow: `0 4px 20px ${hue}55, 0 0 0 1px rgba(0,0,0,0.3)`,
       }}>
@@ -1652,7 +1633,6 @@ function TrendPersonCard({ user, hot }) {
           <div style={{ width: 38, height: 50, borderRadius: '11px 11px 0 0', background: 'rgba(0,0,0,0.15)' }}/>
         </div>
         {/* diagonal stripe pattern overlay */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.07) 0px, rgba(255,255,255,0.07) 1px, transparent 1px, transparent 8px)' }}/>
         {hot && (
           <div style={{
             position: 'absolute', top: 6, right: 6, width: 20, height: 20, borderRadius: '50%',
@@ -1723,7 +1703,7 @@ function ClosetFeedCard({ user }) {
           ))}
         </div>
         <button onClick={() => setPeeked(p => !p)} style={{
-          background: peeked ? 'linear-gradient(135deg, #3DFFA6, #25d688)' : '#111',
+          background: peeked ? '#3DFFA6' : '#111',
           border: 'none', borderRadius: 999, padding: '5px 12px',
           fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 10, fontWeight: 700,
           color: peeked ? '#0a2a18' : '#fff', cursor: 'pointer', whiteSpace: 'nowrap',
@@ -1919,7 +1899,7 @@ function PublicShowroom() {
                 fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 15, fontWeight: 700,
                 letterSpacing: 0.2, transition: 'all 0.2s',
                 background: mainTab === key
-                  ? 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(61,255,166,0.95) 45%, #25d688 100%)'
+                  ? '#3DFFA6'
                   : 'rgba(0,0,0,0.06)',
                 color: mainTab === key ? '#0a2a18' : 'rgba(0,0,0,0.45)',
                 boxShadow: mainTab === key ? '0 0 20px rgba(61,255,166,0.35)' : 'none',
@@ -2109,7 +2089,7 @@ function MiniCalendar() {
       {look && (
         <div style={{
           borderTop: '1px solid rgba(61,255,166,0.2)',
-          background: 'linear-gradient(180deg, rgba(61,255,166,0.07) 0%, rgba(61,255,166,0.03) 100%)',
+          background: 'rgba(61,255,166,0.07)',
           padding: '14px 16px 16px',
           animation: 'ppSlideIn 0.22s ease',
         }}>
@@ -2117,7 +2097,7 @@ function MiniCalendar() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
             <div style={{
               width: 36, height: 36, borderRadius: 10,
-              background: `linear-gradient(135deg, ${gradeColor[look.grade]}, ${look.grade === 'S' ? '#25d688' : look.grade === 'A' ? '#e6b800' : '#e03d8a'})`,
+              background: gradeColor[look.grade],
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontFamily: '"Press Start 2P", monospace', fontSize: 14, color: look.grade === 'B' ? '#fff' : '#0a2a18',
               boxShadow: `0 0 12px ${gradeColor[look.grade]}55`,
@@ -2215,26 +2195,24 @@ function PersonalShowroom() {
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
       {/* Y2K bg glows */}
-      <div style={{ position: 'absolute', top: '-5%', right: '-20%', width: '65%', height: '40%', background: 'radial-gradient(circle, rgba(61,255,166,0.15) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }}/>
-      <div style={{ position: 'absolute', top: '30%', left: '-25%', width: '55%', height: '35%', background: 'radial-gradient(circle, rgba(255,110,175,0.1) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }}/>
-      <div style={{ position: 'absolute', inset: 0, opacity: 0.08, backgroundImage: 'radial-gradient(rgba(61,255,166,0.6) 1px, transparent 1px)', backgroundSize: '24px 24px', maskImage: 'radial-gradient(ellipse at 70% 0%, black 0%, transparent 60%)', WebkitMaskImage: 'radial-gradient(ellipse at 70% 0%, black 0%, transparent 60%)', pointerEvents: 'none', zIndex: 0 }}/>
+
 
       {/* profile header */}
       <div style={{
         position: 'relative', zIndex: 1,
         padding: '48px 20px 0', flexShrink: 0,
-        background: 'linear-gradient(180deg, rgba(13,31,23,0.9) 0%, rgba(13,13,13,0.0) 100%)',
+        background: '#0d1f17',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
           {/* avatar with gradient ring */}
           <div style={{ position: 'relative', flexShrink: 0 }}>
             <div style={{
               width: 64, height: 64, borderRadius: '50%', padding: 2,
-              background: 'linear-gradient(135deg, #3DFFA6, #FF6EAF)',
+              background: '#3DFFA6',
             }}>
               <div style={{
                 width: '100%', height: '100%', borderRadius: '50%',
-                background: 'linear-gradient(135deg, #3DFFA6, #25d688)',
+                background: '#3DFFA6',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: '"Press Start 2P", monospace', fontSize: 18, color: '#0a2a18',
               }}>K</div>
@@ -2303,7 +2281,7 @@ function PersonalShowroom() {
             }}>
               <div style={{
                 width: 48, height: 48, borderRadius: 12,
-                background: 'linear-gradient(135deg, #3DFFA6, #25d688)',
+                background: '#3DFFA6',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: '"Press Start 2P", monospace', fontSize: 20, color: '#0a2a18',
               }}>S</div>
@@ -2332,8 +2310,7 @@ function PersonalShowroom() {
                 <div style={{
                   position: 'absolute', top: 0, left: 0, height: '100%', width: '68%',
                   borderRadius: 999,
-                  background: 'linear-gradient(90deg, #c0ffe0 0%, #3DFFA6 40%, #1a9e68 100%)',
-                  boxShadow: '0 0 8px rgba(61,255,166,0.6)',
+                  background: '#3DFFA6',
                 }}/>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5 }}>
