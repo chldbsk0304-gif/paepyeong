@@ -580,7 +580,7 @@ function PaepyeongResult() {
       <Sparkle size={12} color="#fff" style={{ top: 110, left: 28 }} delay={0.6}/>
       <Sparkle size={20} color="#3DFFA6" style={{ top: 380, right: 14 }} delay={1.1}/>
 
-      <div style={{ position: 'relative', zIndex: 2, height: '100%', display: 'flex', flexDirection: 'column', padding: '62px 20px 20px', boxSizing: 'border-box', overflowY: 'auto' }}>
+      <div style={{ position: 'relative', zIndex: 2, height: '100%', display: 'flex', flexDirection: 'column', padding: '70px 22px 28px', boxSizing: 'border-box', overflowY: 'auto' }}>
         {/* RESULT badge */}
         <div style={{ alignSelf: 'center', display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px 5px', borderRadius: 999, background: `linear-gradient(135deg, ${gradeColor}40, ${gradeColor}14)`, border: `1px solid ${gradeColor}99`, boxShadow: `0 0 16px ${gradeColor}59` }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: gradeColor, boxShadow: `0 0 8px ${gradeColor}`, animation: 'ppBlink 1.2s ease-in-out infinite' }}/>
@@ -1110,42 +1110,31 @@ function SharedBottomNav() {
   const path = location.pathname;
   const isLight = path === '/feed';
 
-  const bg = isLight ? 'rgba(255,255,255,0.92)' : 'rgba(20,20,20,0.96)';
-  const border = isLight ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(255,255,255,0.08)';
-  const inactiveColor = isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.35)';
-  const activeColor = '#3DFFA6';
-  const pinkColor = '#FF6EAF';
+  const bg     = isLight ? 'rgba(255,255,255,0.94)' : 'rgba(10,10,10,0.92)';
+  const border  = isLight ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(61,255,166,0.15)';
+  const inactive = isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.38)';
+  const active  = '#3DFFA6';
+  const fabBg   = isLight ? '#F7F7F7' : '#1A1A1A';
 
   const tabs = [
     {
-      path: '/feed',
-      label: '퍼블릭쇼룸',
-      icon: (active) => (
+      path: '/feed', label: '퍼블릭쇼룸',
+      icon: (on) => (
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <rect x="2" y="8" width="18" height="12" rx="2" stroke={active ? activeColor : inactiveColor} strokeWidth="1.5"/>
-          <path d="M6 8V6a5 5 0 0110 0v2" stroke={active ? activeColor : inactiveColor} strokeWidth="1.5" strokeLinecap="round"/>
-          <circle cx="11" cy="14" r="2" fill={active ? activeColor : inactiveColor}/>
+          <rect x="2" y="8" width="18" height="12" rx="2" stroke={on ? active : inactive} strokeWidth="1.6"
+                fill={on ? 'rgba(61,255,166,0.12)' : 'none'}/>
+          <path d="M6 8V6a5 5 0 0110 0v2" stroke={on ? active : inactive} strokeWidth="1.6" strokeLinecap="round"/>
+          <circle cx="11" cy="14" r="2" fill={on ? active : inactive}/>
         </svg>
       ),
     },
+    { path: '/paepyeong', label: '패평', icon: null },
     {
-      path: '/paepyeong',
-      label: '패평',
-      icon: (active) => (
-        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-          <circle cx="13" cy="13" r="11" fill={active ? activeColor : 'transparent'} stroke={active ? activeColor : pinkColor} strokeWidth="1.5"/>
-          <path d="M8 13h10M13 8v10" stroke={active ? '#0a2a18' : pinkColor} strokeWidth="2" strokeLinecap="round"/>
-          <circle cx="13" cy="13" r="3" fill={active ? '#0a2a18' : pinkColor}/>
-        </svg>
-      ),
-    },
-    {
-      path: '/personal',
-      label: '퍼스널쇼룸',
-      icon: (active) => (
+      path: '/personal', label: '퍼스널쇼룸',
+      icon: (on) => (
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <circle cx="11" cy="7" r="4" stroke={active ? activeColor : inactiveColor} strokeWidth="1.5"/>
-          <path d="M3 20c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke={active ? activeColor : inactiveColor} strokeWidth="1.5" strokeLinecap="round"/>
+          <circle cx="11" cy="7" r="4" stroke={on ? active : inactive} strokeWidth="1.6"/>
+          <path d="M3 20c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke={on ? active : inactive} strokeWidth="1.6" strokeLinecap="round"/>
         </svg>
       ),
     },
@@ -1153,41 +1142,41 @@ function SharedBottomNav() {
 
   return (
     <div style={{
-      position: 'absolute', bottom: 0, left: 0, right: 0, height: 68,
+      position: 'absolute', bottom: 0, left: 0, right: 0,
       background: bg, borderTop: border, backdropFilter: 'blur(12px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-around',
-      padding: '0 8px 8px', zIndex: 100,
+      paddingTop: 8, paddingBottom: 22,
+      display: 'flex', alignItems: 'flex-start', justifyContent: 'space-around',
+      zIndex: 100, overflow: 'visible',
     }}>
       {tabs.map(tab => {
-        const active = path === tab.path || (tab.path === '/feed' && path === '/detail');
+        const isOn = path === tab.path || (tab.path === '/feed' && path === '/detail');
         const isCenter = tab.path === '/paepyeong';
         return (
           <button key={tab.path} onClick={() => history.push(tab.path)}
             style={{
-              flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-              background: 'none', border: 'none', cursor: 'pointer', padding: '6px 0',
-              position: 'relative',
+              flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+              background: 'none', border: 'none', cursor: 'pointer', padding: '4px 4px',
             }}>
-            {isCenter && (
-              <div style={{
-                position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)',
-                width: 52, height: 52, borderRadius: '50%',
-                background: active ? activeColor : 'linear-gradient(135deg, #FF6EAF, #ff3d8a)',
-                boxShadow: active ? '0 0 20px rgba(61,255,166,0.7)' : '0 0 16px rgba(255,110,175,0.6)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                {tab.icon(active)}
-              </div>
+            {isCenter ? (
+              <>
+                <div style={{
+                  width: 52, height: 52, borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #fff, #3DFFA6 55%, #25d688)',
+                  border: `3px solid ${fabBg}`,
+                  boxShadow: '0 0 22px rgba(61,255,166,0.7), inset 1px 1px 2px rgba(255,255,255,0.7)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  marginTop: -22,
+                }}>
+                  <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 16, color: '#0a2a18', textShadow: '0 1px 0 rgba(255,255,255,0.4)' }}>+</span>
+                </div>
+                <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 10, fontWeight: 700, color: active, letterSpacing: 0, textShadow: '0 0 6px rgba(61,255,166,0.5)' }}>패평</span>
+              </>
+            ) : (
+              <>
+                {tab.icon(isOn)}
+                <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 10, fontWeight: isOn ? 700 : 500, color: isOn ? active : inactive, letterSpacing: -0.1 }}>{tab.label}</span>
+              </>
             )}
-            {!isCenter && tab.icon(active)}
-            {!isCenter && (
-              <span style={{
-                fontFamily: '"Press Start 2P", monospace', fontSize: 7,
-                color: active ? activeColor : inactiveColor,
-                lineHeight: 1.2, letterSpacing: '-0.3px',
-              }}>{tab.label}</span>
-            )}
-            {isCenter && <div style={{ height: 34 }}/>}
           </button>
         );
       })}
@@ -1535,16 +1524,30 @@ function PaepyeongHub() {
 
   return (
     <div style={{
-      position: 'absolute', inset: 0, background: '#1A1A1A',
+      position: 'absolute', inset: 0, background: '#0d0d0d',
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
+      {/* Y2K bg layers */}
+      <div style={{ position: 'absolute', top: '-10%', right: '-15%', width: '70%', height: '45%', background: 'radial-gradient(circle, rgba(61,255,166,0.18) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }}/>
+      <div style={{ position: 'absolute', bottom: '15%', left: '-20%', width: '60%', height: '40%', background: 'radial-gradient(circle, rgba(255,110,175,0.1) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }}/>
+      <div style={{ position: 'absolute', inset: 0, opacity: 0.12, backgroundImage: 'radial-gradient(rgba(61,255,166,0.55) 1px, transparent 1px)', backgroundSize: '22px 22px', maskImage: 'radial-gradient(ellipse at 50% 0%, black 0%, transparent 70%)', WebkitMaskImage: 'radial-gradient(ellipse at 50% 0%, black 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }}/>
+
       {/* header */}
-      <div style={{ padding: '52px 20px 16px', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-          <div>
-            <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 16, color: '#3DFFA6',
-              textShadow: '0 0 12px rgba(61,255,166,0.5)', letterSpacing: 1 }}>패평</span>
-            <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: 'rgba(255,255,255,0.4)', marginLeft: 10 }}>HUB</span>
+      <div style={{ position: 'relative', zIndex: 1, padding: '52px 20px 16px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {/* pill chip */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 999, background: 'rgba(61,255,166,0.12)', border: '1px solid rgba(61,255,166,0.3)', alignSelf: 'flex-start' }}>
+              <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#3DFFA6', animation: 'ppBlink 1.4s ease-in-out infinite' }}/>
+              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 10, fontWeight: 700, color: '#3DFFA6', letterSpacing: 1 }}>AI FASHION HUB</span>
+            </div>
+            {/* gradient title */}
+            <span style={{
+              fontFamily: '"Press Start 2P", monospace', fontSize: 16, letterSpacing: 1,
+              background: 'linear-gradient(135deg, #fff 0%, #3DFFA6 55%, #25d688 100%)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>패평</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Sparkle size={18} color="#FF6EAF" delay={0}/>
@@ -1556,18 +1559,21 @@ function PaepyeongHub() {
       </div>
 
       {/* mode tabs */}
-      <div style={{ padding: '0 20px 16px', flexShrink: 0 }}>
+      <div style={{ position: 'relative', zIndex: 1, padding: '0 20px 16px', flexShrink: 0 }}>
         <div style={{
-          display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: 12,
+          display: 'flex', background: 'rgba(255,255,255,0.04)', borderRadius: 14,
           border: '1px solid rgba(255,255,255,0.08)', padding: 4, gap: 4,
         }}>
           {[{ key: 'ootd', label: '📸 OOTD 업로드' }, { key: 'wardrobe', label: '👗 디지털 옷장' }].map(t => (
             <button key={t.key} onClick={() => setMode(t.key)}
               style={{
-                flex: 1, height: 38, borderRadius: 9, border: 'none', cursor: 'pointer',
-                background: mode === t.key ? 'rgba(61,255,166,0.15)' : 'transparent',
+                flex: 1, height: 40, borderRadius: 10, border: 'none', cursor: 'pointer',
+                background: mode === t.key
+                  ? 'linear-gradient(135deg, rgba(61,255,166,0.22) 0%, rgba(37,214,136,0.15) 100%)'
+                  : 'transparent',
+                boxShadow: mode === t.key ? 'inset 0 0 0 1px rgba(61,255,166,0.35)' : 'none',
                 fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, fontWeight: 700,
-                color: mode === t.key ? '#3DFFA6' : 'rgba(255,255,255,0.4)',
+                color: mode === t.key ? '#3DFFA6' : 'rgba(255,255,255,0.38)',
                 transition: 'all 0.2s',
               }}>
               {t.label}
@@ -1577,7 +1583,7 @@ function PaepyeongHub() {
       </div>
 
       {/* panel */}
-      <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ flex: 1, position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {mode === 'ootd'
           ? <OotdUploadPanel onEvaluate={handleEvaluate}/>
           : <WardrobeSelectPanel onEvaluate={handleEvaluate}/>
@@ -1808,8 +1814,9 @@ function PublicShowroom() {
   const TrendSection = ({ label, badge, badgeColor, badgeBg }) => (
     <div style={{ paddingTop: 16, paddingBottom: 4 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0 16px', marginBottom: 12 }}>
+        <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: badgeColor, marginRight: 2 }}>★</span>
         <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 15, fontWeight: 800, color: '#111' }}>{label}</span>
-        <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 7, color: badgeColor, background: badgeBg, padding: '2px 6px', borderRadius: 4, letterSpacing: 0.5 }}>{badge}</span>
+        <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 7, color: badgeColor, background: badgeBg, padding: '2px 7px', borderRadius: 999, letterSpacing: 0.5, border: `1px solid ${badgeColor}55` }}>{badge}</span>
         <div style={{ flex: 1 }}/>
         <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: 'rgba(0,0,0,0.35)', cursor: 'pointer' }}>전체보기 ›</span>
       </div>
@@ -1856,7 +1863,8 @@ function PublicShowroom() {
             <TrendSection label="트렌드 옷장" badge="HOT" badgeColor="#0a6b3e" badgeBg="#E8FFF2"/>
             {/* divider */}
             <div style={{ height: 8, background: 'rgba(0,0,0,0.03)', borderTop: '1px solid rgba(0,0,0,0.05)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}/>
-            <div style={{ padding: '14px 16px 4px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ padding: '14px 16px 4px', display: 'flex', alignItems: 'center', gap: 7 }}>
+              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: '#0a6b3e' }}>★</span>
               <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 15, fontWeight: 800, color: '#111' }}>탐색</span>
               <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: 'rgba(0,0,0,0.35)' }}>{filteredCloset.length}명</span>
             </div>
@@ -1872,7 +1880,8 @@ function PublicShowroom() {
             <TrendSection label="트렌드 코디" badge="NEW" badgeColor="#FF6EAF" badgeBg="rgba(255,110,175,0.1)"/>
             {/* divider */}
             <div style={{ height: 8, background: 'rgba(0,0,0,0.03)', borderTop: '1px solid rgba(0,0,0,0.05)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}/>
-            <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', gap: 7 }}>
+              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: '#FF6EAF' }}>★</span>
               <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 15, fontWeight: 800, color: '#111' }}>탐색</span>
               <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: 'rgba(0,0,0,0.35)' }}>{filteredCodi.length}개</span>
             </div>
@@ -2130,23 +2139,36 @@ function PersonalShowroom() {
 
   return (
     <div style={{
-      position: 'absolute', inset: 0, background: '#1A1A1A',
+      position: 'absolute', inset: 0, background: '#0d0d0d',
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
+      {/* Y2K bg glows */}
+      <div style={{ position: 'absolute', top: '-5%', right: '-20%', width: '65%', height: '40%', background: 'radial-gradient(circle, rgba(61,255,166,0.15) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }}/>
+      <div style={{ position: 'absolute', top: '30%', left: '-25%', width: '55%', height: '35%', background: 'radial-gradient(circle, rgba(255,110,175,0.1) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }}/>
+      <div style={{ position: 'absolute', inset: 0, opacity: 0.08, backgroundImage: 'radial-gradient(rgba(61,255,166,0.6) 1px, transparent 1px)', backgroundSize: '24px 24px', maskImage: 'radial-gradient(ellipse at 70% 0%, black 0%, transparent 60%)', WebkitMaskImage: 'radial-gradient(ellipse at 70% 0%, black 0%, transparent 60%)', pointerEvents: 'none', zIndex: 0 }}/>
+
       {/* profile header */}
       <div style={{
+        position: 'relative', zIndex: 1,
         padding: '48px 20px 0', flexShrink: 0,
-        background: 'linear-gradient(180deg, #0d1f17 0%, #1A1A1A 100%)',
+        background: 'linear-gradient(180deg, rgba(13,31,23,0.9) 0%, rgba(13,13,13,0.0) 100%)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
-          {/* avatar */}
-          <div style={{
-            width: 60, height: 60, borderRadius: '50%', flexShrink: 0,
-            background: 'linear-gradient(135deg, #3DFFA6, #25d688)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: '"Press Start 2P", monospace', fontSize: 18, color: '#0a2a18',
-            boxShadow: '0 0 20px rgba(61,255,166,0.4)',
-          }}>K</div>
+          {/* avatar with gradient ring */}
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: '50%', padding: 2,
+              background: 'linear-gradient(135deg, #3DFFA6, #FF6EAF)',
+            }}>
+              <div style={{
+                width: '100%', height: '100%', borderRadius: '50%',
+                background: 'linear-gradient(135deg, #3DFFA6, #25d688)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: '"Press Start 2P", monospace', fontSize: 18, color: '#0a2a18',
+              }}>K</div>
+            </div>
+            <div style={{ position: 'absolute', inset: -2, borderRadius: '50%', boxShadow: '0 0 22px rgba(61,255,166,0.45)', pointerEvents: 'none' }}/>
+          </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 12, color: '#fff', marginBottom: 4 }}>
               @kate.style
@@ -2157,16 +2179,23 @@ function PersonalShowroom() {
           </div>
           <button onClick={() => {}}
             style={{
-              padding: '7px 14px', borderRadius: 999, border: '1px solid rgba(255,255,255,0.2)',
-              background: 'transparent', fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, fontWeight: 600,
-              color: 'rgba(255,255,255,0.7)', cursor: 'pointer',
+              padding: '7px 14px', borderRadius: 999,
+              border: '1px solid rgba(61,255,166,0.3)',
+              background: 'rgba(61,255,166,0.07)',
+              fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, fontWeight: 600,
+              color: '#3DFFA6', cursor: 'pointer',
             }}>편집</button>
         </div>
-        {/* stats row */}
-        <div style={{ display: 'flex', gap: 0, marginBottom: 16 }}>
+        {/* stats row — bordered card */}
+        <div style={{
+          display: 'flex', gap: 0, marginBottom: 16,
+          borderRadius: 14, border: '1px solid rgba(255,255,255,0.08)',
+          background: 'rgba(255,255,255,0.03)',
+          overflow: 'hidden',
+        }}>
           {[['코디 기록', '47'], ['평균 등급', 'A+'], ['팔로워', '234']].map(([label, val], i, arr) => (
             <div key={label} style={{
-              flex: 1, textAlign: 'center', padding: '10px 0',
+              flex: 1, textAlign: 'center', padding: '12px 0',
               borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none',
             }}>
               <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 13, color: '#3DFFA6', marginBottom: 4 }}>{val}</div>
@@ -2179,18 +2208,19 @@ function PersonalShowroom() {
           {tabs.map(t => (
             <button key={t} onClick={() => setTab(t)}
               style={{
-                flex: 1, height: 38, border: 'none', cursor: 'pointer', background: 'none',
+                flex: 1, height: 40, border: 'none', cursor: 'pointer', background: 'none',
                 fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, fontWeight: 700,
                 color: tab === t ? '#3DFFA6' : 'rgba(255,255,255,0.35)',
                 borderBottom: tab === t ? '2px solid #3DFFA6' : '2px solid transparent',
-                marginBottom: -1, transition: 'all 0.15s',
+                boxShadow: tab === t ? '0 2px 10px rgba(61,255,166,0.35)' : 'none',
+                marginBottom: -1, transition: 'all 0.18s',
               }}>{t}</button>
           ))}
         </div>
       </div>
 
       {/* tab content */}
-      <div style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none', paddingBottom: 68 }}>
+      <div style={{ position: 'relative', zIndex: 1, flex: 1, overflowY: 'auto', scrollbarWidth: 'none', paddingBottom: 68 }}>
         {tab === '쇼룸' && (
           <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* recent grade */}
@@ -2215,6 +2245,28 @@ function PersonalShowroom() {
                 <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: '#3DFFA6', marginTop: 2 }}>
                   상위 3% · 미니멀 페미닌 완성
                 </div>
+              </div>
+            </div>
+            {/* NEXT TIER progress bar */}
+            <div style={{
+              padding: '14px 16px', borderRadius: 14,
+              background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: 'rgba(255,255,255,0.5)', letterSpacing: 0.5 }}>NEXT TIER</span>
+                <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: '#3DFFA6', fontWeight: 700 }}>3회 더 → 패피 Lv.2</span>
+              </div>
+              <div style={{ height: 8, borderRadius: 999, background: 'rgba(255,255,255,0.07)', overflow: 'hidden', position: 'relative' }}>
+                <div style={{
+                  position: 'absolute', top: 0, left: 0, height: '100%', width: '68%',
+                  borderRadius: 999,
+                  background: 'linear-gradient(90deg, #c0ffe0 0%, #3DFFA6 40%, #1a9e68 100%)',
+                  boxShadow: '0 0 8px rgba(61,255,166,0.6)',
+                }}/>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5 }}>
+                <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>패피 Lv.1</span>
+                <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>68%</span>
               </div>
             </div>
             {/* calendar */}
