@@ -9,30 +9,30 @@
 <!-- Space Grotesk (Latin, max 700) + Noto Sans KR (한글) + Press Start 2P + JetBrains Mono -->
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  html, body {
+  html, body, #root {
     margin: 0; padding: 0;
-    width: 100%; min-height: 100vh;
-    background: #0a0a0a;
+    width: 100%; min-height: 100%;
     font-family: "Space Grotesk", "Noto Sans KR", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     color: #fff;
     overflow-x: hidden;
   }
 
+  html { height: 100%; }
+
   body {
-    background:
-      radial-gradient(ellipse at 20% 10%, rgba(61,255,166,0.08) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 90%, rgba(255,61,220,0.06) 0%, transparent 50%),
-      #0a0a0a;
+    background: #0a0a0a;
     min-height: 100vh;
-    display: flex; align-items: center; justify-content: center;
-    padding: 40px 20px;
-    box-sizing: border-box;
+    display: flex;
+    justify-content: center;  /* PC: 중앙 정렬 */
   }
 
+  /* 반응형 앱 컨테이너 */
   #root {
-    display: flex; flex-direction: column; align-items: center;
-    gap: 16px;
+    width: 100%;
+    max-width: 430px;   /* PC: 최대 너비 */
+    min-height: 100vh;
+    position: relative;
   }
 
   @keyframes ppTwinkle {
@@ -1425,8 +1425,7 @@ function OotdUploadPanel({ onEvaluate }) {
           전신이 나오고 조명이 밝은 사진일수록<br/>정확한 평가가 가능해요
         </span>
       </div>
-      <div style={{ position: 'absolute', bottom: 68, left: 0, right: 0, padding: '16px 20px 20px',
-        background: 'linear-gradient(180deg, transparent 0%, rgba(26,26,26,0.9) 40%, #1A1A1A 70%)' }}>
+      <div style={{ position: 'absolute', bottom: 68, left: 0, right: 0, padding: '16px 20px 20px', background: '#0d0d0d' }}>
         <button onClick={() => imageData && onEvaluate({ type: 'ootd', data: imageData })}
           style={{
             width: '100%', height: 52, borderRadius: 999, border: 'none', cursor: 'pointer',
@@ -1473,8 +1472,7 @@ function WardrobeSelectPanel({ onEvaluate }) {
           </div>
         )}
       </div>
-      <div style={{ position: 'absolute', bottom: 68, left: 0, right: 0, padding: '16px 20px 20px',
-        background: 'linear-gradient(180deg, transparent 0%, rgba(26,26,26,0.9) 40%, #1A1A1A 70%)' }}>
+      <div style={{ position: 'absolute', bottom: 68, left: 0, right: 0, padding: '16px 20px 20px', background: '#0d0d0d' }}>
         {selected.length > 0 && (
           <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* badge — Press Start 2P 7px */}
@@ -2443,12 +2441,8 @@ function PersonalShowroom() {
 // ═══════════════════════════════════════════════════════════════
 
 function DeviceWrapper() {
-  const location = useLocation();
-  const lightPaths = ['/feed', '/detail'];
-  const isDark = !lightPaths.includes(location.pathname);
-
   return (
-    <IOSDevice dark={isDark}>
+    <div style={{ width: '100%', minHeight: '100vh', position: 'relative', overflow: 'hidden' }}>
       <Switch>
         <Route exact path="/"           component={PaepyeongOnboarding}/>
         <Route       path="/result"     component={PaepyeongResult}/>
@@ -2457,29 +2451,13 @@ function DeviceWrapper() {
         <Route       path="/paepyeong"  component={PaepyeongHub}/>
         <Route       path="/personal"   component={PersonalShowroom}/>
       </Switch>
-    </IOSDevice>
-  );
-}
-
-function RouteLabel() {
-  const location = useLocation();
-  const labels = {
-    '/':          '01 Onboarding · OOTD Upload',
-    '/result':    '02 Result · Score / Grade',
-    '/feed':      '03 퍼블릭쇼룸 · Public Showroom',
-    '/detail':    '04 Detail · A/B 코디 투표',
-    '/paepyeong': '05 패평 Hub · AI 평가',
-    '/personal':  '06 퍼스널쇼룸 · Personal Showroom',
-  };
-  return (
-    <div className="pp-caption">★ {labels[location.pathname] || '패평'} ★</div>
+    </div>
   );
 }
 
 function App() {
   return (
     <HashRouter>
-      <RouteLabel/>
       <DeviceWrapper/>
     </HashRouter>
   );
