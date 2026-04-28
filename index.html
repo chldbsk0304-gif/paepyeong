@@ -62,6 +62,10 @@
     from { transform: translateX(-100%); opacity: 0; }
     to   { transform: translateX(0);     opacity: 1; }
   }
+  @keyframes ppSlideDown {
+    from { transform: translateY(-100%); opacity: 0; max-height: 0; }
+    to   { transform: translateY(0);     opacity: 1; max-height: 80px; }
+  }
 
   .pp-caption {
     font-family: "Press Start 2P", monospace;
@@ -580,6 +584,27 @@ function PaepyeongResult() {
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: gradeColor, boxShadow: `0 0 8px ${gradeColor}`, animation: 'ppBlink 1.2s ease-in-out infinite' }}/>
           <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 10, color: '#fff', letterSpacing: 3, textShadow: `0 0 8px ${gradeColor}cc` }}>RESULT</span>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: gradeColor, boxShadow: `0 0 8px ${gradeColor}`, animation: 'ppBlink 1.2s 0.6s ease-in-out infinite' }}/>
+        </div>
+
+        {/* 아바타 결괏값 placeholder */}
+        <div style={{
+          marginTop: 16, width: '100%', borderRadius: 12, overflow: 'hidden', flexShrink: 0,
+          border: `1px dashed ${gradeColor}55`,
+          background: 'rgba(255,255,255,0.03)',
+          height: 200,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12,
+        }}>
+          {/* 전신 사람 아이콘 */}
+          <svg width="52" height="72" viewBox="0 0 52 72" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.3 }}>
+            <circle cx="26" cy="10" r="9" stroke="white" strokeWidth="2"/>
+            <path d="M10 30C10 22 16 20 26 20C36 20 42 22 42 30V46H34V68H18V46H10V30Z" stroke="white" strokeWidth="2" fill="none"/>
+            <path d="M10 30L4 50" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+            <path d="M42 30L48 50" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+            <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: gradeColor, letterSpacing: 1, opacity: 0.7 }}>AVATAR</span>
+            <span style={{ fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>아바타 결괏값 (전신)</span>
+          </div>
         </div>
 
         {/* uploaded image — carousel */}
@@ -1436,12 +1461,64 @@ function WardrobeSelectPanel({ onEvaluate }) {
 
   const toggle = (id) => setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
 
+  const selectedItems = dummyProducts.filter(i => selected.includes(i.id));
+
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, overflow: 'hidden' }}>
-      <div style={{ padding: '0 20px' }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* 선택 아이템 미리보기 — 탭 바로 아래, 선택 시에만 나타남 */}
+      {selected.length > 0 && (
+        <div style={{
+          height: 64,
+          padding: '0 20px',
+          background: '#111',
+          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          display: 'flex', alignItems: 'center', gap: 10,
+          flexShrink: 0,
+          animation: 'ppSlideDown 0.2s ease-out both',
+        }}>
+          {/* 썸네일 — div+background-image로 텍스트 완전 차단 */}
+          <div style={{ display: 'flex', gap: 6, flex: 1, overflow: 'hidden', alignItems: 'center' }}>
+            {selectedItems.map(item => (
+              <div key={item.id} style={{
+                width: 44, height: 44, borderRadius: 8, flexShrink: 0,
+                backgroundImage: `url(${item.imageUrl})`,
+                backgroundSize: 'cover', backgroundPosition: 'center',
+                border: '1.5px solid #3DFFA6',
+                position: 'relative', overflow: 'hidden',
+              }}>
+                <div style={{
+                  position: 'absolute', top: 3, right: 3,
+                  width: 14, height: 14, borderRadius: '50%', background: '#3DFFA6',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                    <path d="M1.5 4L3 5.5L6.5 2" stroke="#0a2a18" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* 배지 + 초기화 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 999, background: 'rgba(255,110,175,0.1)', border: '1px solid rgba(255,110,175,0.35)' }}>
+              <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 7, color: '#FF6EAF', letterSpacing: 0.5 }}>{selected.length}개 선택</span>
+            </div>
+            <button onClick={() => setSelected([])}
+              style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 999, padding: '4px 12px',
+                fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
+              초기화
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 카테고리 필터 */}
+      <div style={{ padding: '12px 20px 0' }}>
         <CategoryStrip cats={cats} active={activeCat} onSelect={setActiveCat} dark={true}/>
       </div>
-      <div style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none', padding: '0 20px', paddingBottom: 110 }}>
+
+      {/* 상품 그리드 */}
+      <div style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none', padding: '12px 20px', paddingBottom: 88 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
           {filtered.map(item => (
             <ProductCard key={item.id} item={item}
@@ -1455,20 +1532,9 @@ function WardrobeSelectPanel({ onEvaluate }) {
           </div>
         )}
       </div>
+
+      {/* 하단 평가 버튼 */}
       <div style={{ position: 'absolute', bottom: 68, left: 0, right: 0, padding: '16px 20px 20px', background: '#0d0d0d' }}>
-        {selected.length > 0 && (
-          <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* badge — Press Start 2P 7px */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 999, background: 'rgba(255,110,175,0.1)', border: '1px solid rgba(255,110,175,0.35)' }}>
-            <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 7, color: '#FF6EAF', letterSpacing: 0.5 }}>{selected.length}개 선택됨</span>
-          </div>
-            <button onClick={() => setSelected([])}
-              style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 999, padding: '4px 12px',
-                fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
-              초기화
-            </button>
-          </div>
-        )}
         <button onClick={() => {
             if (selected.length === 0) return;
             const items = dummyProducts.filter(i => selected.includes(i.id));
@@ -1480,9 +1546,7 @@ function WardrobeSelectPanel({ onEvaluate }) {
           }}
           style={{
             width: '100%', height: 52, borderRadius: 999, border: 'none', cursor: 'pointer',
-            background: selected.length > 0
-              ? '#3DFFA6'
-              : 'rgba(255,255,255,0.07)',
+            background: selected.length > 0 ? '#3DFFA6' : 'rgba(255,255,255,0.07)',
             fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 15, fontWeight: 700,
             color: selected.length > 0 ? '#0a2a18' : 'rgba(255,255,255,0.25)',
             letterSpacing: 0.3,
