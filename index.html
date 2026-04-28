@@ -6,13 +6,14 @@
 <title>패평 · PAEPYEONG</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Space Grotesk (Latin, max 700) + Noto Sans KR (한글) + Press Start 2P + JetBrains Mono -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   html, body {
     margin: 0; padding: 0;
     width: 100%; min-height: 100vh;
     background: #0a0a0a;
-    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-family: "Space Grotesk", "Noto Sans KR", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     color: #fff;
     overflow-x: hidden;
@@ -844,7 +845,7 @@ function PaepyeongFeed() {
       <div style={{ height: 58, flexShrink: 0 }}/>
       {/* header */}
       <div style={{ display: 'flex', alignItems: 'center', padding: '8px 16px 10px', background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-        <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 22, fontWeight: 800, color: '#1A1A1A', letterSpacing: -0.5, position: 'relative' }}>
+        <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 22, fontWeight: 700, color: '#1A1A1A', letterSpacing: -0.5, position: 'relative' }}>
           퍼블릭쇼룸<MiniSpark color="#3DFFA6" size={10} style={{ top: -2, right: -10 }}/>
         </div>
         <div style={{ flex: 1 }}/>
@@ -1646,7 +1647,7 @@ function TrendPersonCard({ user, hot }) {
           <div style={{ position: 'absolute', top: 6, right: 6, width: 18, height: 18, borderRadius: '50%', background: '#FF6EAF', border: '2px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8 }}>🔥</div>
         )}
       </div>
-      <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, fontWeight: 700, color: '#111', whiteSpace: 'nowrap' }}>
+      <span style={{ fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 11, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>
         {user.handle.replace('@', '').split('.')[0]}
       </span>
     </div>
@@ -1661,40 +1662,39 @@ function ClosetFeedCard({ user }) {
   );
   return (
     <div style={{
-      background: '#fff', borderRadius: 18, border: '1px solid rgba(0,0,0,0.07)',
+      background: 'rgba(255,255,255,0.04)', borderRadius: 18, border: '1px solid rgba(255,255,255,0.08)',
       padding: 14, display: 'flex', gap: 12, alignItems: 'center',
-      boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
     }}>
       {/* avatar */}
       <div style={{
         width: 46, height: 46, borderRadius: '50%', flexShrink: 0,
         background: user.hue, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: '"Press Start 2P", monospace', fontSize: 14, color: 'rgba(0,0,0,0.28)',
-        boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+        fontFamily: '"Press Start 2P", monospace', fontSize: 14, color: 'rgba(0,0,0,0.45)',
+        boxShadow: '0 0 12px rgba(255,255,255,0.08)',
       }}>
         {user.handle[1].toUpperCase()}
       </div>
       {/* info */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-          <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, fontWeight: 700, color: '#111' }}>
+          <span style={{ fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 13, fontWeight: 700, color: '#fff' }}>
             {user.handle}
           </span>
           <span style={{
             fontFamily: '"Space Grotesk", sans-serif', fontSize: 9, fontWeight: 700,
-            color: '#0a6b3e', background: '#E8FFF2', border: '1px solid rgba(61,255,166,0.45)',
+            color: '#3DFFA6', background: 'rgba(61,255,166,0.12)', border: '1px solid rgba(61,255,166,0.35)',
             padding: '1px 6px', borderRadius: 4,
           }}>Lv.{Math.floor(user.items / 16)}</span>
         </div>
-        <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(0,0,0,0.4)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 5 }}>
+        <div style={{ fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 5 }}>
           {user.bio}
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: 'rgba(0,0,0,0.32)' }}>
+          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: 'rgba(255,255,255,0.28)' }}>
             아이템 {user.items}
           </span>
-          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: 'rgba(0,0,0,0.32)', display: 'flex', alignItems: 'center', gap: 3 }}>
-            <svg width="10" height="10" viewBox="0 0 14 14" fill="none"><path d="M3 3a1.5 1.5 0 011.5-1.5h5A1.5 1.5 0 0111 3v5a1.5 1.5 0 01-1.5 1.5H8l-2.5 2.5V9.5H4.5A1.5 1.5 0 013 8V3z" stroke="rgba(0,0,0,0.32)" strokeWidth="1.2"/></svg>
+          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: 'rgba(255,255,255,0.28)', display: 'flex', alignItems: 'center', gap: 3 }}>
+            <svg width="10" height="10" viewBox="0 0 14 14" fill="none"><path d="M3 3a1.5 1.5 0 011.5-1.5h5A1.5 1.5 0 0111 3v5a1.5 1.5 0 01-1.5 1.5H8l-2.5 2.5V9.5H4.5A1.5 1.5 0 013 8V3z" stroke="rgba(255,255,255,0.28)" strokeWidth="1.2"/></svg>
             {Math.floor(user.items * 0.28)}
           </span>
         </div>
@@ -1726,28 +1726,27 @@ function CodiGridCard({ post, onClick }) {
   return (
     <div onClick={onClick} style={{
       borderRadius: 16, overflow: 'hidden', cursor: 'pointer',
-      background: '#fff', border: '1px solid rgba(0,0,0,0.07)',
-      boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+      background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
     }}>
       <OOTDPlaceholder seed={post.seed} tall/>
-      <div style={{ padding: '9px 10px 10px', background: '#fff' }}>
+      <div style={{ padding: '9px 10px 10px', background: 'transparent' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
           <Avatar name={post.user} size={20}/>
-          <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, fontWeight: 700, color: '#111', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, fontWeight: 700, color: '#fff', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {post.user}
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <span style={{
-            fontFamily: '"Space Grotesk", sans-serif', fontSize: 9, fontWeight: 700,
-            color: '#0a6b3e', background: '#E8FFF2', border: '1px solid rgba(61,255,166,0.4)',
+            fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 9, fontWeight: 700,
+            color: '#3DFFA6', background: 'rgba(61,255,166,0.12)', border: '1px solid rgba(61,255,166,0.35)',
             padding: '1px 5px', borderRadius: 3, whiteSpace: 'nowrap',
           }}>{post.tier}·lv.{post.lv}</span>
           <div style={{ flex: 1 }}/>
           <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
-            <path d="M3 3a1.5 1.5 0 011.5-1.5h5A1.5 1.5 0 0111 3v5a1.5 1.5 0 01-1.5 1.5H8l-2.5 2.5V9.5H4.5A1.5 1.5 0 013 8V3z" stroke="#bbb" strokeWidth="1.3"/>
+            <path d="M3 3a1.5 1.5 0 011.5-1.5h5A1.5 1.5 0 0111 3v5a1.5 1.5 0 01-1.5 1.5H8l-2.5 2.5V9.5H4.5A1.5 1.5 0 013 8V3z" stroke="rgba(255,255,255,0.3)" strokeWidth="1.3"/>
           </svg>
-          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: '#bbb' }}>{post.comments}</span>
+          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{post.comments}</span>
         </div>
       </div>
     </div>
@@ -1786,26 +1785,26 @@ function PublicShowroom() {
   );
 
   const SearchRow = () => (
-    <div style={{ display: 'flex', gap: 8, padding: '12px 16px 10px', background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+    <div style={{ display: 'flex', gap: 8, padding: '12px 16px 10px', background: 'transparent' }}>
       <div style={{
-        flex: 1, height: 40, background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)',
+        flex: 1, height: 40, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
         borderRadius: 12, display: 'flex', alignItems: 'center', gap: 9, padding: '0 12px',
       }}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <circle cx="6" cy="6" r="4.5" stroke="rgba(0,0,0,0.3)" strokeWidth="1.3"/>
-          <path d="M10 10l2.5 2.5" stroke="rgba(0,0,0,0.3)" strokeWidth="1.3" strokeLinecap="round"/>
+          <circle cx="6" cy="6" r="4.5" stroke="rgba(255,255,255,0.35)" strokeWidth="1.3"/>
+          <path d="M10 10l2.5 2.5" stroke="rgba(255,255,255,0.35)" strokeWidth="1.3" strokeLinecap="round"/>
         </svg>
         <input value={search} onChange={e => setSearch(e.target.value)}
           placeholder={mainTab === '옷장' ? '유저, 브랜드 검색…' : '코디, 태그 검색…'}
-          style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, color: '#111' }}/>
-        {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(0,0,0,0.3)', fontSize: 13, lineHeight: 1 }}>✕</button>}
+          style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 13, color: '#fff' }}/>
+        {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1 }}>✕</button>}
       </div>
       <button style={{
-        flexShrink: 0, width: 40, height: 40, borderRadius: 12, border: '1px solid rgba(0,0,0,0.1)',
-        background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+        flexShrink: 0, width: 40, height: 40, borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)',
+        background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
       }}>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M2 4h12M4 8h8M6 12h4" stroke="#111" strokeWidth="1.6" strokeLinecap="round"/>
+          <path d="M2 4h12M4 8h8M6 12h4" stroke="rgba(255,255,255,0.6)" strokeWidth="1.6" strokeLinecap="round"/>
         </svg>
       </button>
     </div>
@@ -1813,84 +1812,117 @@ function PublicShowroom() {
 
   const TrendSection = ({ label, badge, badgeColor, badgeBg }) => (
     <div style={{ paddingTop: 16, paddingBottom: 4 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0 16px', marginBottom: 12 }}>
-        <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: badgeColor, marginRight: 2 }}>★</span>
-        <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 15, fontWeight: 800, color: '#111' }}>{label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0 16px', marginBottom: 14 }}>
+        <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: badgeColor }}>★</span>
+        <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: badgeColor, letterSpacing: 2 }}>{label}</span>
         <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 7, color: badgeColor, background: badgeBg, padding: '2px 7px', borderRadius: 999, letterSpacing: 0.5, border: `1px solid ${badgeColor}55` }}>{badge}</span>
         <div style={{ flex: 1 }}/>
-        <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: 'rgba(0,0,0,0.35)', cursor: 'pointer' }}>전체보기 ›</span>
+        <span style={{ fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.35)', cursor: 'pointer' }}>전체보기 ›</span>
       </div>
-      <div style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '0 16px 8px', scrollbarWidth: 'none' }}>
+      <div style={{ display: 'flex', gap: 14, overflowX: 'auto', padding: '0 16px 8px', scrollbarWidth: 'none' }}>
         {TREND_USERS.map((u, i) => <TrendPersonCard key={i} user={u} hot={u.hot}/>)}
       </div>
     </div>
   );
 
   return (
-    <div style={{ position: 'absolute', inset: 0, background: '#F7F7F7', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ position: 'absolute', inset: 0, background: '#0d0d0d', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Y2K bg glows */}
+      <div style={{ position: 'absolute', top: '-5%', right: '-15%', width: '60%', height: '40%', background: 'radial-gradient(circle, rgba(61,255,166,0.14) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }}/>
+      <div style={{ position: 'absolute', bottom: '20%', left: '-20%', width: '55%', height: '40%', background: 'radial-gradient(circle, rgba(255,110,175,0.08) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }}/>
+
       {/* sticky header */}
-      <div style={{ flexShrink: 0, background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+      <div style={{ position: 'relative', zIndex: 1, flexShrink: 0, background: 'rgba(13,13,13,0.95)', borderBottom: '1px solid rgba(255,255,255,0.07)', backdropFilter: 'blur(12px)' }}>
         <div style={{ padding: '48px 16px 0' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 13, color: '#111' }}>퍼블릭쇼룸</span>
-            <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
-              <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#FF6EAF', animation: 'ppBlink 1s infinite' }}/>
-              <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: '#FF6EAF' }}>LIVE</span>
+            {/* title */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 22, fontWeight: 700, color: '#fff', letterSpacing: -0.3 }}>퍼블릭쇼룸</span>
+              <span style={{ fontSize: 14, color: '#3DFFA6' }}>✦</span>
+            </div>
+            {/* icons */}
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+              {/* search icon */}
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <circle cx="9" cy="9" r="6" stroke="rgba(255,255,255,0.6)" strokeWidth="1.6"/>
+                <path d="M14 14l3.5 3.5" stroke="rgba(255,255,255,0.6)" strokeWidth="1.6" strokeLinecap="round"/>
+              </svg>
+              {/* bell icon */}
+              <div style={{ position: 'relative' }}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M10 2a6 6 0 00-6 6v3l-1.5 2.5h15L16 11V8a6 6 0 00-6-6z" stroke="rgba(255,255,255,0.6)" strokeWidth="1.6" strokeLinejoin="round"/>
+                  <path d="M8 15.5a2 2 0 004 0" stroke="rgba(255,255,255,0.6)" strokeWidth="1.6"/>
+                </svg>
+                <div style={{ position: 'absolute', top: -1, right: -1, width: 7, height: 7, borderRadius: '50%', background: '#FF6EAF', border: '1.5px solid #0d0d0d' }}/>
+              </div>
             </div>
           </div>
         </div>
-        {/* tabs */}
-        <div style={{ display: 'flex', padding: '0 16px' }}>
-          {['옷장', '코디'].map(t => (
-            <button key={t} onClick={() => { setMainTab(t); setSearch(''); }}
+        {/* segment tabs — large pill style */}
+        <div style={{ display: 'flex', padding: '0 16px 12px', gap: 8 }}>
+          {[['코디 피드', '코디'], ['디지털 옷장', '옷장']].map(([label, key]) => (
+            <button key={key} onClick={() => { setMainTab(key); setSearch(''); }}
               style={{
-                flex: 1, height: 42, border: 'none', cursor: 'pointer', background: 'none',
-                fontFamily: '"Space Grotesk", sans-serif', fontSize: 15, fontWeight: 800,
-                color: mainTab === t ? '#111' : 'rgba(0,0,0,0.28)',
-                borderBottom: mainTab === t ? '2.5px solid #111' : '2.5px solid transparent',
-                transition: 'all 0.15s',
-              }}>{t}</button>
+                flex: 1, height: 42, borderRadius: 999, border: 'none', cursor: 'pointer',
+                fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 15, fontWeight: 700,
+                transition: 'all 0.2s',
+                background: mainTab === key
+                  ? 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(61,255,166,0.95) 45%, #25d688 100%)'
+                  : 'rgba(255,255,255,0.06)',
+                color: mainTab === key ? '#0a2a18' : 'rgba(255,255,255,0.45)',
+                boxShadow: mainTab === key ? '0 0 18px rgba(61,255,166,0.4)' : 'none',
+              }}>{label}</button>
+          ))}
+        </div>
+        {/* sub-tabs — 추천 팔로잉 인기 */}
+        <div style={{ display: 'flex', padding: '0 16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          {['추천', '팔로잉', '인기'].map(t => (
+            <button key={t} style={{
+              padding: '10px 16px', border: 'none', background: 'none', cursor: 'pointer',
+              fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 13, fontWeight: t === '추천' ? 700 : 500,
+              color: t === '추천' ? '#3DFFA6' : 'rgba(255,255,255,0.38)',
+              borderBottom: t === '추천' ? '2px solid #3DFFA6' : '2px solid transparent',
+              marginBottom: -1,
+            }}>{t}</button>
           ))}
         </div>
       </div>
 
       {/* scrollable content */}
-      <div style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none', paddingBottom: 68 }}>
+      <div style={{ position: 'relative', zIndex: 1, flex: 1, overflowY: 'auto', scrollbarWidth: 'none', paddingBottom: 68 }}>
         <SearchRow/>
 
         {mainTab === '옷장' ? (
           <>
-            <TrendSection label="트렌드 옷장" badge="HOT" badgeColor="#0a6b3e" badgeBg="#E8FFF2"/>
-            {/* divider */}
-            <div style={{ height: 8, background: 'rgba(0,0,0,0.03)', borderTop: '1px solid rgba(0,0,0,0.05)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}/>
+            <TrendSection label="TREND CLOSET" badge="HOT" badgeColor="#3DFFA6" badgeBg="rgba(61,255,166,0.12)"/>
+            <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '4px 0' }}/>
             <div style={{ padding: '14px 16px 4px', display: 'flex', alignItems: 'center', gap: 7 }}>
-              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: '#0a6b3e' }}>★</span>
-              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 15, fontWeight: 800, color: '#111' }}>탐색</span>
-              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: 'rgba(0,0,0,0.35)' }}>{filteredCloset.length}명</span>
+              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: '#3DFFA6' }}>★</span>
+              <span style={{ fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 15, fontWeight: 700, color: '#fff' }}>탐색</span>
+              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>{filteredCloset.length}명</span>
             </div>
             <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10, paddingBottom: 8 }}>
               {filteredCloset.map((u, i) => <ClosetFeedCard key={i} user={u}/>)}
               {filteredCloset.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '32px 0', fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, color: 'rgba(0,0,0,0.3)' }}>검색 결과가 없어요</div>
+                <div style={{ textAlign: 'center', padding: '32px 0', fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>검색 결과가 없어요</div>
               )}
             </div>
           </>
         ) : (
           <>
-            <TrendSection label="트렌드 코디" badge="NEW" badgeColor="#FF6EAF" badgeBg="rgba(255,110,175,0.1)"/>
-            {/* divider */}
-            <div style={{ height: 8, background: 'rgba(0,0,0,0.03)', borderTop: '1px solid rgba(0,0,0,0.05)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}/>
+            <TrendSection label="TREND CLOSET" badge="NEW" badgeColor="#FF6EAF" badgeBg="rgba(255,110,175,0.12)"/>
+            <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '4px 0' }}/>
             <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', gap: 7 }}>
               <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: '#FF6EAF' }}>★</span>
-              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 15, fontWeight: 800, color: '#111' }}>탐색</span>
-              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: 'rgba(0,0,0,0.35)' }}>{filteredCodi.length}개</span>
+              <span style={{ fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 15, fontWeight: 700, color: '#fff' }}>탐색</span>
+              <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>{filteredCodi.length}개</span>
             </div>
             <div style={{ padding: '0 16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, paddingBottom: 8 }}>
               {filteredCodi.map((p, i) => (
                 <CodiGridCard key={i} post={p} onClick={() => history.push('/detail')}/>
               ))}
               {filteredCodi.length === 0 && (
-                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '32px 0', fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, color: 'rgba(0,0,0,0.3)' }}>검색 결과가 없어요</div>
+                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '32px 0', fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>검색 결과가 없어요</div>
               )}
             </div>
           </>
@@ -2370,7 +2402,7 @@ function PersonalShowroom() {
 
 function DeviceWrapper() {
   const location = useLocation();
-  const lightPaths = ['/feed', '/detail'];
+  const lightPaths = ['/detail'];
   const isDark = !lightPaths.includes(location.pathname);
 
   return (
