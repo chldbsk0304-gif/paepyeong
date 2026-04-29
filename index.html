@@ -1704,8 +1704,8 @@ function OotdUploadPanel({ onEvaluate }) {
           전신이 나오고 조명이 밝은 사진일수록<br/>정확한 평가가 가능해요
         </span>
       </div>
-      {/* 하단 버튼 */}
-      <div style={{ flexShrink: 0, paddingTop: 12, paddingBottom: 16 }}>
+      {/* 하단 버튼 — paddingBottom으로 position:absolute 네비게이션 바 높이 확보 */}
+      <div style={{ flexShrink: 0, paddingTop: 12, paddingBottom: 88 }}>
         <button onClick={() => imageData && onEvaluate({ type: 'ootd', data: imageData })}
           style={{
             width: '100%', height: 52, borderRadius: 999, border: 'none', cursor: 'pointer',
