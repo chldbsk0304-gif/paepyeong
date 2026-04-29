@@ -706,7 +706,10 @@ function AvatarResultCard({ avatarMapping, gradeColor }) {
           throw new Error(`API 응답 파싱 실패 (${resp.status}): ${rawText.slice(0, 200)}`);
         }
         console.log('[Avatar ⑦] API 응답 body keys:', Object.keys(json));
-        if (!resp.ok) throw new Error(json.error || `서버 오류 (${resp.status})`);
+        if (!resp.ok) {
+          const detail = json.detail ? `\n${json.detail.slice(0, 200)}` : '';
+          throw new Error((json.error || `서버 오류 (${resp.status})`) + detail);
+        }
 
         if (!cancelled) {
           console.log('[Avatar ⑧] 이미지 렌더링. mimeType:', json.mimeType);
