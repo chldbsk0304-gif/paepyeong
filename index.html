@@ -70,6 +70,14 @@
     from { transform: translateY(-100%); opacity: 0; max-height: 0; }
     to   { transform: translateY(0);     opacity: 1; max-height: 80px; }
   }
+  @keyframes ppSlideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  @keyframes ppFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
 
   .pp-caption {
     font-family: "Press Start 2P", monospace;
@@ -109,6 +117,7 @@ const EVALUATE_ENDPOINT = '/api/evaluate';
 let _lastEvalResult = null;
 let _lastEvalImages = []; // 결과 화면에 표시할 업로드 이미지 previewUrl 목록
 let _lastAvatarMapping = null; // { avatarId, imagePath, bodyData } — 디지털 옷장 평가 시 설정
+let _userWardrobeAdditions = []; // OOTD 분석으로 옷장에 추가된 아이템
 
 // ═══════════════════════════════════════════════════════════════
 // AVATAR DATA — 5개 아바타 스타일 정의 + 신체 조건
@@ -594,6 +603,287 @@ function PaepyeongOnboarding() {
 // SCREEN 02 — EVALUATION RESULT
 // ═══════════════════════════════════════════════════════════════
 
+// ── OOTD 착장 AI 분석 ──────────────────────────────────────────
+async function analyzeOotdForItems(imageDataUrl) {
+  const commaIdx = imageDataUrl.indexOf(',');
+  const meta      = imageDataUrl.slice(0, commaIdx);
+  const b64       = imageDataUrl.slice(commaIdx + 1);
+  const mediaType = (meta.match(/:(.*?);/) || [])[1] || 'image/jpeg';
+
+  const systemPrompt =
+    `당신은 패션 아이템 인식 AI입니다. 이미지 속 착용 중인 의류·신발·가방·소품을 모두 분석하세요.\n` +
+    `각 아이템을 다음 JSON 배열로만 응답하세요. 다른 텍스트는 절대 포함하지 마세요.\n\n` +
+    `category 값(반드시 아래 중 하나): "상의" | "아우터" | "바지" | "원피스/스커트" | "신발" | "가방" | "소품"\n` +
+    `brand: 로고·라벨이 식별되면 브랜드명, 불가면 null\n` +
+    `name: 제품명이 식별되면 기재, 불가면 색상·소재·실루엣 기반 설명 (예: "오버핏 흰색 크루넥 티셔츠")\n` +
+    `price: 가격 식별 가능하면 숫자(원 단위), 불가면 null\n\n` +
+    `[{"category":"...","brand":...,"name":"...","price":...}]`;
+
+  const messages = [{ role: 'user', content: [
+    { type: 'image', source: { type: 'base64', media_type: mediaType, data: b64 } },
+    { type: 'text', text: '이 OOTD 사진에서 착용한 모든 아이템을 분석해주세요.' },
+  ]}];
+
+  const resp = await fetch(EVALUATE_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ system: systemPrompt, messages }),
+  });
+  if (!resp.ok) throw new Error(`AI 분석 오류 (${resp.status})`);
+  const data = await resp.json();
+  const text = (data?.content?.[0]?.text || data?.content || '').trim();
+  const match = text.match(/\[[\s\S]*\]/);
+  if (!match) throw new Error('아이템 인식 결과를 파싱할 수 없어요');
+  return JSON.parse(match[0]);
+}
+
+// ── OOTD → 옷장 저장 Bottom Sheet ─────────────────────────────
+function WardrobeSaveSheet({ imageDataUrl, onClose, onSaved }) {
+  const [phase, setPhase]   = useState('loading'); // 'loading' | 'review'
+  const [items, setItems]   = useState([]);
+  const [errMsg, setErrMsg] = useState(null);
+
+  const CAT_COLOR = {
+    '상의': '#3DFFA6', '아우터': '#FF6EAF', '바지': '#64B5F6',
+    '원피스/스커트': '#FFA040', '신발': '#FFD700',
+    '가방': '#A78BFA', '소품': 'rgba(255,255,255,0.5)',
+  };
+
+  useEffect(() => {
+    analyzeOotdForItems(imageDataUrl)
+      .then(detected => {
+        const allExisting = [...dummyProducts, ..._userWardrobeAdditions];
+        const withMeta = detected.map((item, i) => {
+          const brand = (item.brand || '').toLowerCase();
+          const name  = (item.name  || '').toLowerCase().slice(0, 8);
+          const isDup = allExisting.some(p =>
+            brand && (p.brand||'').toLowerCase() === brand &&
+            (p.name||'').toLowerCase().includes(name)
+          );
+          return { ...item, _id: i, _included: true, _editing: false, _dup: isDup };
+        });
+        setItems(withMeta);
+        setPhase('review');
+      })
+      .catch(e => { setErrMsg(e.message); setPhase('review'); });
+  }, []);
+
+  const update = (id, patch) =>
+    setItems(prev => prev.map(it => it._id === id ? { ...it, ...patch } : it));
+
+  const handleSave = () => {
+    const toSave = items
+      .filter(i => i._included)
+      .map((item, idx) => ({
+        id: Date.now() + idx,
+        brand:    item.brand || '',
+        name:     item.name  || '',
+        category: item.category || '소품',
+        price:    typeof item.price === 'number' ? item.price : null,
+        imageUrl: imageDataUrl,   // OOTD 사진을 썸네일로 재활용
+        url:      '',
+        tags:     [],
+      }));
+    _userWardrobeAdditions.push(...toSave);
+    onSaved(toSave.length);
+    onClose();
+  };
+
+  const includedCount = items.filter(i => i._included).length;
+
+  return (
+    <div onClick={onClose} style={{
+      position: 'absolute', inset: 0, zIndex: 300,
+      background: 'rgba(0,0,0,0.62)',
+      display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+      animation: 'ppFadeIn 0.2s ease both',
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: '#1a1a1a',
+        borderRadius: '20px 20px 0 0',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderBottom: 'none',
+        display: 'flex', flexDirection: 'column',
+        maxHeight: '82%',
+        animation: 'ppSlideUp 0.3s cubic-bezier(0.22,1,0.36,1) both',
+      }}>
+        {/* 드래그 핸들 */}
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 0' }}>
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.18)' }}/>
+        </div>
+
+        {/* 헤더 */}
+        <div style={{
+          padding: '10px 20px 14px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0,
+        }}>
+          <div>
+            <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: '#3DFFA6', letterSpacing: 1 }}>
+              {phase === 'loading' ? 'ANALYZING...' : `인식된 아이템 ${items.length}개`}
+            </div>
+            {phase === 'review' && items.length > 0 && (
+              <div style={{ fontFamily: '"Space Grotesk","Noto Sans KR",sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 3 }}>
+                저장할 아이템을 선택하세요
+              </div>
+            )}
+          </div>
+          <button onClick={onClose} style={{
+            width: 28, height: 28, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.08)', border: 'none',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+          }}>
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+              <path d="M1 1l9 9M10 1L1 10" stroke="rgba(255,255,255,0.6)" strokeWidth="1.7" strokeLinecap="round"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* 로딩 */}
+        {phase === 'loading' && (
+          <div style={{ padding: '44px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', border: '3px solid rgba(61,255,166,0.18)', borderTopColor: '#3DFFA6', animation: 'ppSpin 0.9s linear infinite' }}/>
+            <div style={{ fontFamily: '"Space Grotesk","Noto Sans KR",sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>착장 아이템 인식 중...</div>
+          </div>
+        )}
+
+        {/* 에러 */}
+        {phase === 'review' && errMsg && (
+          <div style={{ padding: '24px 20px', textAlign: 'center' }}>
+            <div style={{ fontFamily: '"Space Grotesk",sans-serif', fontSize: 13, color: '#ff9090', marginBottom: 12 }}>{errMsg}</div>
+            <button onClick={onClose} style={{ padding: '8px 20px', borderRadius: 999, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)', fontFamily: '"Space Grotesk",sans-serif', fontSize: 13, cursor: 'pointer' }}>닫기</button>
+          </div>
+        )}
+
+        {/* 아이템 리스트 */}
+        {phase === 'review' && !errMsg && (
+          <>
+            <div style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none' }}>
+              {items.map(item => (
+                <div key={item._id} style={{
+                  padding: '14px 20px',
+                  borderBottom: '1px solid rgba(255,255,255,0.05)',
+                  opacity: item._included ? 1 : 0.38,
+                  transition: 'opacity 0.2s',
+                }}>
+                  {/* 상단: 카테고리 태그 + 중복뱃지 + 포함 토글 */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{
+                        padding: '3px 8px', borderRadius: 999,
+                        background: `${CAT_COLOR[item.category] || 'rgba(255,255,255,0.15)'}20`,
+                        border: `1px solid ${CAT_COLOR[item.category] || 'rgba(255,255,255,0.2)'}55`,
+                        fontFamily: '"Press Start 2P", monospace', fontSize: 6, letterSpacing: 0.5,
+                        color: CAT_COLOR[item.category] || 'rgba(255,255,255,0.55)',
+                      }}>{item.category}</div>
+                      {item._dup && (
+                        <div style={{
+                          padding: '2px 7px', borderRadius: 999,
+                          background: 'rgba(255,160,64,0.12)', border: '1px solid rgba(255,160,64,0.4)',
+                          fontFamily: '"Space Grotesk",sans-serif', fontSize: 9, fontWeight: 600, color: '#FFA040',
+                        }}>이미 저장된 아이템이에요</div>
+                      )}
+                    </div>
+                    <div onClick={() => update(item._id, { _included: !item._included })} style={{
+                      width: 22, height: 22, borderRadius: '50%', cursor: 'pointer', flexShrink: 0,
+                      background: item._included ? '#3DFFA6' : 'rgba(255,255,255,0.1)',
+                      border: item._included ? 'none' : '1.5px solid rgba(255,255,255,0.22)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      transition: 'all 0.15s',
+                    }}>
+                      {item._included && (
+                        <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                          <path d="M2 5.5l2.5 2.5L9 3" stroke="#0a2a18" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 아이템 정보 / 편집 */}
+                  {item._editing ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                      {[
+                        { label: '브랜드', k: 'brand', ph: '브랜드명' },
+                        { label: '제품명', k: 'name',  ph: '제품명'  },
+                        { label: '가격',   k: 'price', ph: '예: 39000' },
+                      ].map(({ label, k, ph }) => (
+                        <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontFamily: '"Space Grotesk",sans-serif', fontSize: 10, color: 'rgba(255,255,255,0.32)', width: 34, flexShrink: 0 }}>{label}</span>
+                          <input
+                            value={k === 'price' ? (item[k] != null ? String(item[k]) : '') : (item[k] || '')}
+                            onChange={e => {
+                              const v = k === 'price'
+                                ? (e.target.value === '' ? null : parseInt(e.target.value.replace(/[^0-9]/g,''),10)||null)
+                                : e.target.value;
+                              update(item._id, { [k]: v });
+                            }}
+                            placeholder={ph}
+                            style={{
+                              flex: 1, background: 'rgba(255,255,255,0.06)',
+                              border: '1px solid rgba(61,255,166,0.38)', borderRadius: 8,
+                              padding: '7px 10px', boxSizing: 'border-box',
+                              fontFamily: '"Space Grotesk","Noto Sans KR",sans-serif',
+                              fontSize: 12, color: '#fff', outline: 'none',
+                            }}/>
+                        </div>
+                      ))}
+                      <button onClick={() => update(item._id, { _editing: false })} style={{
+                        alignSelf: 'flex-end', padding: '5px 16px', borderRadius: 999, marginTop: 2,
+                        background: '#3DFFA6', border: 'none',
+                        fontFamily: '"Space Grotesk",sans-serif', fontSize: 11, fontWeight: 700,
+                        color: '#0a2a18', cursor: 'pointer',
+                      }}>완료</button>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        {item.brand && (
+                          <div style={{ fontFamily: '"Space Grotesk",sans-serif', fontSize: 11, fontWeight: 700, color: '#3DFFA6', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.brand}</div>
+                        )}
+                        <div style={{ fontFamily: '"Space Grotesk","Noto Sans KR",sans-serif', fontSize: 13, fontWeight: 600, color: '#fff', lineHeight: 1.4, wordBreak: 'keep-all' }}>{item.name}</div>
+                        <div style={{ fontFamily: '"JetBrains Mono",monospace', fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>
+                          {item.price != null ? `${Number(item.price).toLocaleString()}원` : '가격 미상'}
+                        </div>
+                      </div>
+                      <button onClick={() => update(item._id, { _editing: true })} style={{
+                        width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+                        background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                      }}>
+                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                          <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <div style={{ padding: '12px 20px 40px', flexShrink: 0, background: '#1a1a1a', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+              <button
+                disabled={includedCount === 0}
+                onClick={handleSave}
+                style={{
+                  width: '100%', height: 52, borderRadius: 999, border: 'none',
+                  cursor: includedCount > 0 ? 'pointer' : 'default',
+                  background: includedCount > 0 ? '#3DFFA6' : 'rgba(255,255,255,0.07)',
+                  fontFamily: '"Space Grotesk","Noto Sans KR",sans-serif', fontSize: 15, fontWeight: 700,
+                  color: includedCount > 0 ? '#0a2a18' : 'rgba(255,255,255,0.25)',
+                  boxShadow: includedCount > 0 ? '0 0 24px rgba(61,255,166,0.45)' : 'none',
+                  transition: 'all 0.2s',
+                }}>
+                {includedCount > 0 ? `옷장에 저장하기 (${includedCount}개)  ▸` : '저장할 아이템을 선택하세요'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function useCountUp(target, duration = 1400, delay = 200) {
   const [n, setN] = useState(0);
   useEffect(() => {
@@ -832,6 +1122,28 @@ function PaepyeongResult() {
 
   const [carouselIdx, setCarouselIdx] = React.useState(0);
   const touchStartX = React.useRef(null);
+
+  // ── 옷장 저장 관련 state ──
+  const isOotdMode = _lastEvalImages.length > 0 && !_lastAvatarMapping;
+  const [showSaveSheet, setShowSaveSheet] = React.useState(false);
+  const [savedToast,    setSavedToast]    = React.useState(null); // number | null
+  const [showTooltip,   setShowTooltip]   = React.useState(() => {
+    try { return !localStorage.getItem('pp_wardrobe_tip_shown'); }
+    catch(_) { return false; }
+  });
+  // 툴팁 3초 후 자동 사라짐 + localStorage 기록
+  React.useEffect(() => {
+    if (!showTooltip || !isOotdMode) return;
+    try { localStorage.setItem('pp_wardrobe_tip_shown', '1'); } catch(_) {}
+    const t = setTimeout(() => setShowTooltip(false), 3000);
+    return () => clearTimeout(t);
+  }, [showTooltip, isOotdMode]);
+  // 토스트 3초 후 자동 사라짐
+  React.useEffect(() => {
+    if (savedToast === null) return;
+    const t = setTimeout(() => setSavedToast(null), 3000);
+    return () => clearTimeout(t);
+  }, [savedToast]);
   const imgCount = _lastEvalImages.length;
   const carouselPrev = () => setCarouselIdx(i => (i - 1 + imgCount) % imgCount);
   const carouselNext = () => setCarouselIdx(i => (i + 1) % imgCount);
@@ -861,6 +1173,28 @@ function PaepyeongResult() {
       <Sparkle size={12} color="#fff" style={{ top: 110, left: 28 }} delay={0.6}/>
       <Sparkle size={20} color="#3DFFA6" style={{ top: 380, right: 14 }} delay={1.1}/>
 
+      {/* 저장 완료 토스트 */}
+      {savedToast !== null && (
+        <div style={{
+          position: 'absolute', top: 56, left: 20, right: 20, zIndex: 400,
+          background: 'rgba(13,42,24,0.95)', backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(61,255,166,0.55)',
+          borderRadius: 14, padding: '12px 16px',
+          display: 'flex', alignItems: 'center', gap: 10,
+          boxShadow: '0 4px 24px rgba(61,255,166,0.25)',
+          animation: 'ppFadeIn 0.25s ease both',
+        }}>
+          <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#3DFFA6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <path d="M2 6.5l3 3L11 3" stroke="#0a2a18" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <span style={{ fontFamily: '"Space Grotesk","Noto Sans KR",sans-serif', fontSize: 13, fontWeight: 600, color: '#fff' }}>
+            {savedToast}개 아이템이 옷장에 추가됐어요
+          </span>
+        </div>
+      )}
+
       <div style={{ position: 'relative', zIndex: 2, height: '100%', display: 'flex', flexDirection: 'column', padding: '70px 22px 28px', boxSizing: 'border-box', overflowY: 'auto' }}>
         {/* RESULT badge */}
         <div style={{ alignSelf: 'center', display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px 5px', borderRadius: 999, background: `${gradeColor}1e`, border: `1px solid ${gradeColor}99`, boxShadow: `0 0 16px ${gradeColor}59` }}>
@@ -876,7 +1210,7 @@ function PaepyeongResult() {
 
         {/* uploaded image — carousel */}
         {imgCount > 0 && (
-          <div style={{ marginTop: 16, marginBottom: 4, width: '100%', borderRadius: 12, overflow: 'hidden', flexShrink: 0 }}>
+          <div style={{ marginTop: 16, marginBottom: 4, width: '100%', borderRadius: 12, overflow: 'visible', flexShrink: 0, position: 'relative' }}>
             <div
               onTouchStart={onTouchStart}
               onTouchEnd={onTouchEnd}
@@ -898,7 +1232,51 @@ function PaepyeongResult() {
                   </div>
                 </>
               )}
+
+              {/* 🗂 옷장 저장 버튼 — OOTD 모드에서만 */}
+              {isOotdMode && (
+                <button
+                  onClick={() => { setShowTooltip(false); setShowSaveSheet(true); }}
+                  style={{
+                    position: 'absolute', top: 10, right: 10,
+                    width: 36, height: 36, borderRadius: '50%',
+                    background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)',
+                    border: '1.5px solid rgba(61,255,166,0.6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', zIndex: 10,
+                  }}>
+                  <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+                    <rect x="2" y="3" width="14" height="12" rx="2" stroke="#3DFFA6" strokeWidth="1.6"/>
+                    <path d="M6 3V1M12 3V1" stroke="#3DFFA6" strokeWidth="1.6" strokeLinecap="round"/>
+                    <path d="M5 9h8M5 12h5" stroke="#3DFFA6" strokeWidth="1.4" strokeLinecap="round"/>
+                  </svg>
+                </button>
+              )}
             </div>
+
+            {/* 툴팁 — 최초 1회, 3초 후 사라짐 */}
+            {isOotdMode && showTooltip && (
+              <div style={{
+                position: 'absolute', top: 8, right: 54,
+                background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(61,255,166,0.45)',
+                borderRadius: 10, padding: '7px 12px',
+                fontFamily: '"Space Grotesk","Noto Sans KR",sans-serif',
+                fontSize: 11, fontWeight: 600, color: '#fff',
+                whiteSpace: 'nowrap', zIndex: 20,
+                animation: 'ppFadeIn 0.3s ease both',
+              }}>
+                착장을 옷장에 저장해보세요 👗
+                {/* 말풍선 꼬리 */}
+                <div style={{
+                  position: 'absolute', right: -6, top: '50%', transform: 'translateY(-50%)',
+                  width: 0, height: 0,
+                  borderTop: '5px solid transparent',
+                  borderBottom: '5px solid transparent',
+                  borderLeft: '6px solid rgba(61,255,166,0.45)',
+                }}/>
+              </div>
+            )}
           </div>
         )}
 
@@ -969,6 +1347,15 @@ function PaepyeongResult() {
           </button>
         </div>
       </div>
+
+      {/* 옷장 저장 Bottom Sheet */}
+      {showSaveSheet && (
+        <WardrobeSaveSheet
+          imageDataUrl={_lastEvalImages[carouselIdx] || _lastEvalImages[0]}
+          onClose={() => setShowSaveSheet(false)}
+          onSaved={(n) => { setShowSaveSheet(false); setSavedToast(n); }}
+        />
+      )}
     </div>
   );
 }
@@ -1728,7 +2115,8 @@ function WardrobeSelectPanel({ onEvaluate }) {
   const [selected, setSelected] = useState([]);
   const cats = ['전체', '상의', '아우터', '바지', '원피스·스커트', '신발', '가방', '소품'];
   const catAlias = { '원피스·스커트': '원피스/스커트' };
-  const filtered = activeCat === '전체' ? dummyProducts : dummyProducts.filter(i => i.category === (catAlias[activeCat] || activeCat));
+  const allWardrobeItems = [...dummyProducts, ..._userWardrobeAdditions];
+  const filtered = activeCat === '전체' ? allWardrobeItems : allWardrobeItems.filter(i => i.category === (catAlias[activeCat] || activeCat));
 
   const toggle = (id) => setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
 
@@ -2701,9 +3089,10 @@ function PersonalShowroom() {
   // 편집 사항이 반영된 아이템 반환
   const getItem = (item) => ({ ...item, ...(itemEdits[item.id] || {}) });
 
+  const allPersonalItems = [...dummyProducts, ..._userWardrobeAdditions];
   const filtered = wardrobeCat === '전체'
-    ? dummyProducts
-    : dummyProducts.filter(i => i.category === (wardrobeCatAlias[wardrobeCat] || wardrobeCat));
+    ? allPersonalItems
+    : allPersonalItems.filter(i => i.category === (wardrobeCatAlias[wardrobeCat] || wardrobeCat));
 
   const handleSaveEdit = (id, edits) => {
     setItemEdits(prev => ({ ...prev, [id]: { ...(prev[id] || {}), ...edits } }));
@@ -2879,7 +3268,7 @@ function PersonalShowroom() {
           <div style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
               <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
-                총 {dummyProducts.length}개 아이템
+                총 {allPersonalItems.length}개 아이템
               </span>
               <button style={{ background: 'rgba(61,255,166,0.1)', border: '1px solid rgba(61,255,166,0.3)', borderRadius: 999,
                 padding: '5px 12px', fontFamily: '"Space Grotesk", sans-serif', fontSize: 11, fontWeight: 700,
