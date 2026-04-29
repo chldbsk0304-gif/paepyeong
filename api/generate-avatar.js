@@ -1,10 +1,19 @@
 export const config = {
-  api: { bodyParser: { sizeLimit: '20mb' } },
+  api: { bodyParser: { sizeLimit: '4mb' } },
   maxDuration: 60,
 };
 
 const MODEL = 'gemini-3.1-flash-image-preview';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+
+async function fetchImageAsBase64(url) {
+  const resp = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  if (!resp.ok) throw new Error(`이미지 로드 실패 (${resp.status}): ${url}`);
+  const buffer = await resp.arrayBuffer();
+  const base64 = Buffer.from(buffer).toString('base64');
+  const ct = resp.headers.get('content-type') || 'image/jpeg';
+  return { data: base64, mimeType: ct.split(';')[0] };
+}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,27 +26,30 @@ export default async function handler(req, res) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY가 설정되지 않았습니다' });
 
-  const { avatarBase64, avatarMimeType, clothingUrls, bodyData } = req.body;
+  const { avatarId, clothingUrls, bodyData } = req.body;
 
-  if (!avatarBase64) return res.status(400).json({ error: 'avatarBase64가 필요합니다' });
+  if (!avatarId) return res.status(400).json({ error: 'avatarId가 필요합니다' });
   if (!clothingUrls?.length) return res.status(400).json({ error: 'clothingUrls가 필요합니다' });
   if (!bodyData) return res.status(400).json({ error: 'bodyData가 필요합니다' });
 
-  // ── 의류 이미지 URL → base64 변환 (서버사이드 fetch로 CORS 우회) ──
+  // ── 아바타 이미지 서버사이드 fetch (클라이언트에서 base64 전송 없이) ──
+  const host = req.headers.host;
+  const protocol = host?.includes('localhost') ? 'http' : 'https';
+  const avatarUrl = `${protocol}://${host}/assets/avatars/avatar_${avatarId}.png`;
+
+  let avatarImage;
+  try {
+    avatarImage = await fetchImageAsBase64(avatarUrl);
+  } catch (e) {
+    return res.status(502).json({ error: `아바타 이미지 로드 실패: ${e.message}` });
+  }
+
+  // ── 의류 이미지 서버사이드 fetch ──
   let clothingImages;
   try {
-    clothingImages = await Promise.all(
-      clothingUrls.map(async (url) => {
-        const resp = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-        if (!resp.ok) throw new Error(`의류 이미지 로드 실패 (${resp.status}): ${url}`);
-        const buffer = await resp.arrayBuffer();
-        const base64 = Buffer.from(buffer).toString('base64');
-        const ct = resp.headers.get('content-type') || 'image/jpeg';
-        return { data: base64, mimeType: ct.split(';')[0] };
-      })
-    );
+    clothingImages = await Promise.all(clothingUrls.map(fetchImageAsBase64));
   } catch (e) {
-    return res.status(502).json({ error: `의류 이미지 로드 중 오류: ${e.message}` });
+    return res.status(502).json({ error: `의류 이미지 로드 실패: ${e.message}` });
   }
 
   // ── 신체 조건 문자열 ──
@@ -45,7 +57,7 @@ export default async function handler(req, res) {
     `Character body specifications: Height ${bodyData.height}, Weight ${bodyData.weight}. ` +
     `Body type: ${bodyData.body}. Skin tone: ${bodyData.skin}. Hair: ${bodyData.hair}.`;
 
-  // ── 프롬프트 (사용자 스펙 그대로) ──
+  // ── 프롬프트 ──
   const promptText =
     `Use the provided reference images as follows:\n` +
     `Character reference: Match the facial features, hair style, body proportions, ` +
@@ -66,7 +78,7 @@ export default async function handler(req, res) {
 
   // ── Gemini API 호출 ──
   const parts = [
-    { inlineData: { mimeType: avatarMimeType || 'image/png', data: avatarBase64 } },
+    { inlineData: { mimeType: avatarImage.mimeType, data: avatarImage.data } },
     ...clothingImages.map(img => ({ inlineData: { mimeType: img.mimeType, data: img.data } })),
     { text: promptText },
   ];
@@ -86,7 +98,7 @@ export default async function handler(req, res) {
   }
 
   if (!geminiResp.ok) {
-    const errText = await geminiResp.text().catch(() => '(응답 읽기 실패)');
+    const errText = await geminiResp.text().catch(() => '(읽기 실패)');
     return res.status(geminiResp.status).json({
       error: `Gemini API 오류 (${geminiResp.status})`,
       detail: errText.slice(0, 500),

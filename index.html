@@ -670,34 +670,19 @@ function AvatarResultCard({ avatarMapping, gradeColor }) {
 
   React.useEffect(() => {
     let cancelled = false;
-    console.log('[Avatar ①] AvatarResultCard 마운트', { avatarId, imagePath, clothingCount: clothingImageUrls?.length });
     (async () => {
       try {
-        // 1. 아바타 이미지 fetch → base64
-        console.log('[Avatar ②] 아바타 이미지 fetch 시작:', imagePath);
-        const avatarResp = await fetch(imagePath);
-        console.log('[Avatar ③] 아바타 fetch 응답:', avatarResp.status, avatarResp.ok);
-        if (!avatarResp.ok) throw new Error(`아바타 이미지 파일이 없습니다.\n${imagePath} 를 추가해주세요.`);
-        const avatarBlob = await avatarResp.blob();
-        const avatarDataUrl = await blobToBase64(avatarBlob);
-        const avatarBase64 = avatarDataUrl.split(',')[1];
-        const avatarMimeType = avatarBlob.type || 'image/png';
-        console.log('[Avatar ④] base64 변환 완료. mimeType:', avatarMimeType, '길이:', avatarBase64.length);
-
-        // 2. Gemini 이미지 생성 API 호출
-        console.log('[Avatar ⑤] /api/generate-avatar 호출', { clothingUrls: clothingImageUrls, clothingCount: clothingImageUrls?.length });
+        // avatarId만 전송 — 서버에서 직접 아바타 이미지 fetch (413 방지)
         const resp = await fetch('/api/generate-avatar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            avatarBase64,
-            avatarMimeType,
+            avatarId,
             clothingUrls: clothingImageUrls,
             bodyData,
           }),
         });
 
-        console.log('[Avatar ⑥] API 응답 status:', resp.status, resp.ok);
         let json;
         try {
           json = await resp.json();
@@ -705,19 +690,16 @@ function AvatarResultCard({ avatarMapping, gradeColor }) {
           const rawText = await resp.text().catch(() => '(읽기 실패)');
           throw new Error(`API 응답 파싱 실패 (${resp.status}): ${rawText.slice(0, 200)}`);
         }
-        console.log('[Avatar ⑦] API 응답 body keys:', Object.keys(json));
         if (!resp.ok) {
           const detail = json.detail ? `\n${json.detail.slice(0, 200)}` : '';
           throw new Error((json.error || `서버 오류 (${resp.status})`) + detail);
         }
 
         if (!cancelled) {
-          console.log('[Avatar ⑧] 이미지 렌더링. mimeType:', json.mimeType);
           setGeneratedSrc(`data:${json.mimeType};base64,${json.imageBase64}`);
           setGenStatus('done');
         }
       } catch (e) {
-        console.error('[Avatar ❌] 오류:', e.message);
         if (!cancelled) {
           setErrorMsg(e.message);
           setGenStatus('error');
