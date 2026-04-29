@@ -129,6 +129,21 @@ def is_valid(p):
     return bool(p.get("name")) and bool(p.get("imageUrl")) and bool(p.get("brand"))
 
 
+def dedup(products):
+    """URL 기준 중복 제거. URL 없는 경우 name+imageUrl 조합으로 fallback."""
+    seen = set()
+    result = []
+    for p in products:
+        key = p.get("url") or f"{p.get('name','')}|{p.get('imageUrl','')}"
+        if key not in seen:
+            seen.add(key)
+            result.append(p)
+    removed = len(products) - len(result)
+    if removed:
+        print(f"🧹 중복 제거: {removed}개 삭제 → {len(result)}개 남음")
+    return result
+
+
 def to_js(products):
     lines = ["var dummyProducts = ["]
     for i, p in enumerate(products):
@@ -191,6 +206,7 @@ def cleanup_js(output_path):
 
     before = parse_js_products(content)
     after = [p for p in before if is_valid(p)]
+    after = dedup(after)
     removed = len(before) - len(after)
 
     with open(output_path, "w", encoding="utf-8") as f:
@@ -221,7 +237,7 @@ async def main():
 
         await browser.close()
 
-    valid_products = [p for p in products if is_valid(p)]
+    valid_products = dedup([p for p in products if is_valid(p)])
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
