@@ -87,11 +87,60 @@ async def scrape_product(page, url, category):
 
         price_raw = await page.evaluate(
             """() => {
-                const els = Array.from(document.querySelectorAll('[class*="price"]'));
-                for (const el of els) {
-                    const text = el.innerText.replace(/[^0-9]/g, '');
-                    if (text.length >= 4) return text;
+                // ── 1순위: Open Graph / meta 태그 ──────────────────────────
+                const metaPrice = document.querySelector(
+                    'meta[property="product:price:amount"], ' +
+                    'meta[name="twitter:data1"], ' +
+                    'meta[property="og:price:amount"]'
+                );
+                if (metaPrice) {
+                    const n = parseInt(metaPrice.content.replace(/[^0-9]/g, ''), 10);
+                    if (n >= 1000) return String(n);
                 }
+
+                // ── 2순위: JSON-LD structured data ────────────────────────
+                for (const el of document.querySelectorAll('script[type="application/ld+json"]')) {
+                    try {
+                        const obj = JSON.parse(el.textContent);
+                        const price = (obj.offers && obj.offers.price) ||
+                                      (Array.isArray(obj.offers) && obj.offers[0]?.price);
+                        if (price) {
+                            const n = parseInt(String(price).replace(/[^0-9]/g, ''), 10);
+                            if (n >= 1000) return String(n);
+                        }
+                    } catch(_) {}
+                }
+
+                // ── 3순위: 무신사 특화 셀렉터 ────────────────────────────
+                const specificSels = [
+                    '[class*="SalePrice"]',
+                    '[class*="sale_price"]',
+                    '[class*="selling-price"]',
+                    '[class*="selling_price"]',
+                    '[class*="final-price"]',
+                    '[class*="finalPrice"]',
+                    '[class*="price_sale"]',
+                    '.price-box [class*="price"]',
+                    '.product-price [class*="price"]',
+                ];
+                for (const sel of specificSels) {
+                    const el = document.querySelector(sel);
+                    if (el) {
+                        const n = parseInt(el.innerText.replace(/[^0-9]/g, ''), 10);
+                        if (n >= 1000) return String(n);
+                    }
+                }
+
+                // ── 4순위: price 키워드 포함 요소에서 최솟값 추출 ────────
+                // (최솟값 = 할인가 가능성 높음, 단 1000원 미만은 노이즈로 제거)
+                const candidates = [];
+                for (const el of document.querySelectorAll('[class*="price"]')) {
+                    const text = el.innerText || '';
+                    const n = parseInt(text.replace(/[^0-9]/g, ''), 10);
+                    if (n >= 1000 && n <= 10000000) candidates.push(n);
+                }
+                if (candidates.length) return String(Math.min(...candidates));
+
                 return null;
             }"""
         )
@@ -117,7 +166,8 @@ async def scrape_product(page, url, category):
             "url": url,
             "tags": [],
         }
-        print(f"✅ 수집완료: {name}")
+        price_str = f"{price:,}원" if price else "가격없음"
+        print(f"✅ 수집완료: {name} / {price_str}")
         return product
 
     except Exception as e:
