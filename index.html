@@ -1649,16 +1649,14 @@ function OotdUploadPanel({ onEvaluate }) {
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, padding: '0 20px' }}>
-      {/* 스크롤 가능한 콘텐츠 영역 */}
-      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16, paddingBottom: 16 }}>
-        <p style={{ fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.55)', margin: 0, letterSpacing: 0.1 }}>
-          오늘의 OOTD를 업로드하고 AI 패션 평가를 받아보세요
-        </p>
-        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }}/>
-        {/* portrait slot — 고정 높이로 화면 넘침 방지 */}
-        <div onClick={() => fileInputRef.current && fileInputRef.current.click()}
-          style={{
-            height: 360, flexShrink: 0, borderRadius: 16, cursor: 'pointer', overflow: 'hidden',
+      <p style={{ fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.55)', margin: '0 0 12px', letterSpacing: 0.1, flexShrink: 0 }}>
+        오늘의 OOTD를 업로드하고 AI 패션 평가를 받아보세요
+      </p>
+      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }}/>
+      {/* portrait slot — flex:1 으로 남은 공간 꽉 채움 */}
+      <div onClick={() => fileInputRef.current && fileInputRef.current.click()}
+        style={{
+          flex: 1, minHeight: 0, borderRadius: 16, cursor: 'pointer', overflow: 'hidden',
             border: imageData ? '2px solid #3DFFA6' : '2px dashed rgba(61,255,166,0.35)',
             background: imageData ? 'rgba(61,255,166,0.06)' : 'rgba(255,255,255,0.03)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14,
@@ -1695,19 +1693,18 @@ function OotdUploadPanel({ onEvaluate }) {
               </div>
             </>
           )}
-        </div>
-        <div style={{
-          padding: '10px 16px', borderRadius: 12, flexShrink: 0,
-          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-          display: 'flex', gap: 10, alignItems: 'center',
-        }}>
-          <span style={{ fontSize: 16 }}>💡</span>
-          <span style={{ fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>
-            전신이 나오고 조명이 밝은 사진일수록<br/>정확한 평가가 가능해요
-          </span>
-        </div>
       </div>
-      {/* 하단 버튼 — 플로우 내 고정, absolute 제거 */}
+      <div style={{
+        marginTop: 12, padding: '10px 16px', borderRadius: 12, flexShrink: 0,
+        background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+        display: 'flex', gap: 10, alignItems: 'center',
+      }}>
+        <span style={{ fontSize: 16 }}>💡</span>
+        <span style={{ fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5, wordBreak: 'keep-all' }}>
+          전신이 나오고 조명이 밝은 사진일수록<br/>정확한 평가가 가능해요
+        </span>
+      </div>
+      {/* 하단 버튼 */}
       <div style={{ flexShrink: 0, paddingTop: 12, paddingBottom: 16 }}>
         <button onClick={() => imageData && onEvaluate({ type: 'ootd', data: imageData })}
           style={{
