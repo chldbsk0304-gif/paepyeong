@@ -3,7 +3,7 @@ export const config = {
   maxDuration: 60,
 };
 
-const MODEL = 'gemini-2.0-flash-preview-image-generation';
+const MODEL = 'gemini-3.1-flash-image-preview';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
 export default async function handler(req, res) {
