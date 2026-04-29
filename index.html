@@ -1577,7 +1577,9 @@ function parseProductName(fullName) {
 
 function ProductCard({ item, selected, onToggle }) {
   const [imgError, setImgError] = useState(false);
-  const { brand, product } = parseProductName(item.name);
+  const { brand: parsedBrand, product: parsedProduct } = parseProductName(item.name);
+  const brand = item.brand && item.brand !== '무신사' ? item.brand : parsedBrand;
+  const product = item.brand && item.brand !== '무신사' ? item.name : parsedProduct;
   return (
     <div onClick={onToggle} style={{
       position: 'relative', borderRadius: 8, overflow: 'hidden',
