@@ -670,17 +670,22 @@ function AvatarResultCard({ avatarMapping, gradeColor }) {
 
   React.useEffect(() => {
     let cancelled = false;
+    console.log('[Avatar ①] AvatarResultCard 마운트', { avatarId, imagePath, clothingCount: clothingImageUrls?.length });
     (async () => {
       try {
         // 1. 아바타 이미지 fetch → base64
+        console.log('[Avatar ②] 아바타 이미지 fetch 시작:', imagePath);
         const avatarResp = await fetch(imagePath);
+        console.log('[Avatar ③] 아바타 fetch 응답:', avatarResp.status, avatarResp.ok);
         if (!avatarResp.ok) throw new Error(`아바타 이미지 파일이 없습니다.\n${imagePath} 를 추가해주세요.`);
         const avatarBlob = await avatarResp.blob();
         const avatarDataUrl = await blobToBase64(avatarBlob);
         const avatarBase64 = avatarDataUrl.split(',')[1];
         const avatarMimeType = avatarBlob.type || 'image/png';
+        console.log('[Avatar ④] base64 변환 완료. mimeType:', avatarMimeType, '길이:', avatarBase64.length);
 
         // 2. Gemini 이미지 생성 API 호출
+        console.log('[Avatar ⑤] /api/generate-avatar 호출', { clothingUrls: clothingImageUrls, clothingCount: clothingImageUrls?.length });
         const resp = await fetch('/api/generate-avatar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -692,14 +697,24 @@ function AvatarResultCard({ avatarMapping, gradeColor }) {
           }),
         });
 
-        const json = await resp.json();
+        console.log('[Avatar ⑥] API 응답 status:', resp.status, resp.ok);
+        let json;
+        try {
+          json = await resp.json();
+        } catch (parseErr) {
+          const rawText = await resp.text().catch(() => '(읽기 실패)');
+          throw new Error(`API 응답 파싱 실패 (${resp.status}): ${rawText.slice(0, 200)}`);
+        }
+        console.log('[Avatar ⑦] API 응답 body keys:', Object.keys(json));
         if (!resp.ok) throw new Error(json.error || `서버 오류 (${resp.status})`);
 
         if (!cancelled) {
+          console.log('[Avatar ⑧] 이미지 렌더링. mimeType:', json.mimeType);
           setGeneratedSrc(`data:${json.mimeType};base64,${json.imageBase64}`);
           setGenStatus('done');
         }
       } catch (e) {
+        console.error('[Avatar ❌] 오류:', e.message);
         if (!cancelled) {
           setErrorMsg(e.message);
           setGenStatus('error');
@@ -865,28 +880,9 @@ function PaepyeongResult() {
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: gradeColor, boxShadow: `0 0 8px ${gradeColor}`, animation: 'ppBlink 1.2s 0.6s ease-in-out infinite' }}/>
         </div>
 
-        {/* 아바타 결괏값 — 디지털 옷장 모드: 실제 이미지 / OOTD 모드: 플레이스홀더 */}
-        {_lastAvatarMapping ? (
+        {/* 아바타 결괏값 — 디지털 옷장 모드에서만 표시 */}
+        {_lastAvatarMapping && (
           <AvatarResultCard avatarMapping={_lastAvatarMapping} gradeColor={gradeColor}/>
-        ) : (
-          <div style={{
-            marginTop: 16, width: '100%', borderRadius: 12, overflow: 'hidden', flexShrink: 0,
-            border: `1px dashed ${gradeColor}55`,
-            background: 'rgba(255,255,255,0.03)',
-            height: 200,
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12,
-          }}>
-            <svg width="52" height="72" viewBox="0 0 52 72" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.3 }}>
-              <circle cx="26" cy="10" r="9" stroke="white" strokeWidth="2"/>
-              <path d="M10 30C10 22 16 20 26 20C36 20 42 22 42 30V46H34V68H18V46H10V30Z" stroke="white" strokeWidth="2" fill="none"/>
-              <path d="M10 30L4 50" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M42 30L48 50" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, color: gradeColor, letterSpacing: 1, opacity: 0.7 }}>AVATAR</span>
-              <span style={{ fontFamily: '"Space Grotesk", "Noto Sans KR", sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>아바타 결괏값 (전신)</span>
-            </div>
-          </div>
         )}
 
         {/* uploaded image — carousel */}
@@ -1828,6 +1824,7 @@ function WardrobeSelectPanel({ onEvaluate }) {
               return `${idx + 1}. [${item.category}] ${brand} - ${product}`;
             }).join('\n');
             _lastAvatarMapping = { ...mapAvatar(items), clothingImageUrls: items.map(i => i.imageUrl) };
+            console.log('[Avatar 매핑]', { avatarId: _lastAvatarMapping.avatarId, detectedStyles: _lastAvatarMapping.detectedStyles, imagePath: _lastAvatarMapping.imagePath, clothingCount: _lastAvatarMapping.clothingImageUrls.length });
             onEvaluate({ type: 'wardrobe', data: text, selectedItems: items });
           }}
           style={{
