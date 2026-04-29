@@ -1739,7 +1739,8 @@ function WardrobeSelectPanel({ onEvaluate }) {
   const [activeCat, setActiveCat] = useState('전체');
   const [selected, setSelected] = useState([]);
   const cats = ['전체', '상의', '아우터', '바지', '원피스·스커트', '신발', '가방', '소품'];
-  const filtered = activeCat === '전체' ? dummyProducts : dummyProducts.filter(i => i.category === activeCat);
+  const catAlias = { '원피스·스커트': '원피스/스커트' };
+  const filtered = activeCat === '전체' ? dummyProducts : dummyProducts.filter(i => i.category === (catAlias[activeCat] || activeCat));
 
   const toggle = (id) => setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
 
