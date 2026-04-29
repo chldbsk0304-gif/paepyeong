@@ -261,8 +261,12 @@ oneLiner 작성 규칙:
 - 옷에만 집중, 인격 공격 절대 금지
 
 ## 상세 설명 (summary 필드)
-- 친절한 존댓말, 잘된 점 먼저 → 개선점 순서
-- 핵심 문제 1~2가지만. 전문 용어 금지 ("위아래가 따로 노는 느낌", "색이 너무 싸우고 있어요" 식으로)
+- 친절한 존댓말로 작성
+- 반드시 아래 3개 문단 구조로 작성하고, 문단 사이는 \n\n(빈 줄)으로 구분:
+  문단1: 전체적인 코디 평가 및 잘된 점 (칭찬 먼저)
+  문단2: 아쉬운 점 또는 문제 지적 (핵심 1~2가지만)
+  문단3: 개선 팁 또는 제안 (구체적 행동)
+- 전문 용어 금지 ("위아래가 따로 노는 느낌", "색이 너무 싸우고 있어요" 식으로)
 
 ## 핵심 넛지 (nudge 필드)
 - 현재 등급에서 한 단계 올라가기 위한 행동 1가지
@@ -924,13 +928,17 @@ function PaepyeongResult() {
         {/* one-liner */}
         <div style={{ marginTop: 20, padding: '20px 16px', background: `${gradeColor}12`, border: `1px solid ${gradeColor}59`, borderRadius: 12, textAlign: 'center', position: 'relative' }}>
           <div style={{ position: 'absolute', top: -8, left: 14, fontFamily: '"Press Start 2P", monospace', fontSize: 7, letterSpacing: 1.5, color: gradeColor, background: '#1A1A1A', padding: '2px 6px' }}>★ ONE LINE</div>
-          <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 18, letterSpacing: -0.3, color: '#fff', textShadow: `0 0 14px ${gradeColor}80`, lineHeight: 1.5 }}>"{evalData.oneLiner}"</div>
+          <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 18, letterSpacing: -0.3, color: '#fff', textShadow: `0 0 14px ${gradeColor}80`, lineHeight: 1.5, wordBreak: 'keep-all' }}>"{evalData.oneLiner}"</div>
         </div>
 
         {/* AI summary */}
         <div style={{ marginTop: 20, padding: '14px 14px', background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(61,255,166,0.3)', borderRadius: 10, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
           <div style={{ flexShrink: 0, width: 28, height: 28, borderRadius: 6, background: '#3DFFA6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: '#0a2a18' }}>AI</div>
-          <div style={{ flex: 1, fontFamily: '"Space Grotesk", sans-serif', fontSize: 12.5, lineHeight: 1.8, color: 'rgba(255,255,255,0.75)' }}>{evalData.summary}</div>
+          <div style={{ flex: 1, fontFamily: '"Space Grotesk", sans-serif', fontSize: 12.5, lineHeight: 1.8, color: 'rgba(255,255,255,0.75)', wordBreak: 'keep-all' }}>
+            {(evalData.summary || '').split(/\n\n+/).map((para, i) => (
+              <p key={i} style={{ margin: i === 0 ? 0 : '10px 0 0' }}>{para.trim()}</p>
+            ))}
+          </div>
         </div>
 
         {/* stat bars */}
