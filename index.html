@@ -674,7 +674,7 @@ function AvatarResultCard({ avatarMapping, gradeColor }) {
       try {
         // 1. 아바타 이미지 fetch → base64
         const avatarResp = await fetch(imagePath);
-        if (!avatarResp.ok) throw new Error(`아바타 이미지를 불러올 수 없습니다 (${avatarResp.status})`);
+        if (!avatarResp.ok) throw new Error(`아바타 이미지 파일이 없습니다.\n${imagePath} 를 추가해주세요.`);
         const avatarBlob = await avatarResp.blob();
         const avatarDataUrl = await blobToBase64(avatarBlob);
         const avatarBase64 = avatarDataUrl.split(',')[1];
