@@ -1,4 +1,0 @@
-# 디지털 옷장 크롤러 (Python 3.9)
-playwright>=1.40.0
-playwright-stealth>=2.0.0
-flask>=2.3.0
