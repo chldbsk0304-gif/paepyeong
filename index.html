@@ -82,6 +82,18 @@
     from { transform: scale(0.93); opacity: 0; }
     to   { transform: scale(1);    opacity: 1; }
   }
+  @keyframes ppSlideDownPanel {
+    from { transform: translateY(-100%); }
+    to   { transform: translateY(0); }
+  }
+  @keyframes ppShimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes ppImgFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
 
   .pp-caption {
     font-family: "Press Start 2P", monospace;
@@ -116,6 +128,76 @@ const { HashRouter, Switch, Route, useHistory, useLocation } = ReactRouterDOM;
 // API 엔드포인트 — Vercel serverless proxy
 // ═══════════════════════════════════════════════════════════════
 const EVALUATE_ENDPOINT = '/api/evaluate';
+const FIND_PRODUCT_IMAGE_ENDPOINT = '/api/find-product-image';
+
+// ── 제품 이미지 캐시 (sessionStorage) ──────────────────────────
+function _pimgCacheKey(brand, name) {
+  return `pp_pimg:${(brand||'').trim().toLowerCase()}|${(name||'').trim().toLowerCase()}`;
+}
+function _pimgCacheGet(brand, name) {
+  try {
+    const raw = sessionStorage.getItem(_pimgCacheKey(brand, name));
+    return raw ? JSON.parse(raw) : null;
+  } catch (_) { return null; }
+}
+function _pimgCacheSet(brand, name, payload) {
+  try { sessionStorage.setItem(_pimgCacheKey(brand, name), JSON.stringify(payload)); }
+  catch (_) {}
+}
+
+// ── OOTD 사진에서 bbox 영역 크롭 → dataUrl ─────────────────────
+// bbox: [x, y, w, h] in normalized 0~1 coords
+async function cropDataUrl(imageDataUrl, bbox) {
+  if (!imageDataUrl || !Array.isArray(bbox) || bbox.length !== 4) return null;
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const W = img.naturalWidth, H = img.naturalHeight;
+      // 정규화 좌표 → 픽셀, padding 6% 여유 + 클램프
+      const pad = 0.06;
+      const [nx, ny, nw, nh] = bbox;
+      const x = Math.max(0, Math.round((nx - pad * nw) * W));
+      const y = Math.max(0, Math.round((ny - pad * nh) * H));
+      const w = Math.min(W - x, Math.round((nw + 2 * pad * nw) * W));
+      const h = Math.min(H - y, Math.round((nh + 2 * pad * nh) * H));
+      if (w < 16 || h < 16) { resolve(null); return; }
+      const canvas = document.createElement('canvas');
+      // 정사각형 출력으로 정규화
+      const side = Math.max(w, h);
+      canvas.width = side; canvas.height = side;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillRect(0, 0, side, side);
+      ctx.drawImage(img, x, y, w, h, (side - w) / 2, (side - h) / 2, w, h);
+      try { resolve(canvas.toDataURL('image/jpeg', 0.85)); }
+      catch (_) { resolve(null); }
+    };
+    img.onerror = () => resolve(null);
+    img.src = imageDataUrl;
+  });
+}
+
+// ── Claude web_search로 제품 공식 이미지 URL 찾기 ──────────────
+async function findProductImage({ brand, name, category }) {
+  if (!brand && !name) return null;
+  const cached = _pimgCacheGet(brand, name);
+  if (cached) return cached;
+  try {
+    const resp = await fetch(FIND_PRODUCT_IMAGE_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ brand: brand || '', name: name || '', category: category || '' }),
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (data && data.imageUrl) {
+      _pimgCacheSet(brand, name, data);
+      return data;
+    }
+    _pimgCacheSet(brand, name, { imageUrl: null });
+    return null;
+  } catch (_) { return null; }
+}
 
 // HashRouter는 history.push(path, state) state 전달 미지원 → 전역 변수로 우회
 let _lastEvalResult = null;
@@ -623,8 +705,9 @@ async function analyzeOotdForItems(imageDataUrl) {
     `- brand: 로고·라벨로 브랜드를 확실히 식별한 경우에만 기재, 불확실하면 null\n` +
     `- name: 제품명이 식별되면 기재, 아니면 색상·소재·핏 기반 설명 (예: "오버핏 흰색 크루넥 티셔츠")\n` +
     `- price: 가격 정보가 사진에 보이면 숫자(원), 불가면 null\n` +
-    `- imageUrl: brand와 name을 모두 정확히 식별했을 때만 무신사 또는 공개 이미지 직링크 URL, 나머지는 null\n\n` +
-    `[{"category":"...","brand":...,"name":"...","price":...,"imageUrl":...}]`;
+    `- imageUrl: brand와 name을 모두 정확히 식별했을 때만 무신사 또는 공개 이미지 직링크 URL, 나머지는 null\n` +
+    `- bbox: 사진 내 해당 아이템 위치를 0~1 정규화 좌표 [x, y, w, h]로 표기 (좌상단 기준). 추정 어려우면 null\n\n` +
+    `[{"category":"...","brand":...,"name":"...","price":...,"imageUrl":...,"bbox":[0.1,0.2,0.4,0.3]}]`;
 
   const messages = [{ role: 'user', content: [
     { type: 'image', source: { type: 'base64', media_type: mediaType, data: b64 } },
@@ -692,21 +775,45 @@ const CAT_ICONS = {
 };
 
 function ItemThumbnail({ item, ootdDataUrl, catColor }) {
-  const [imgSrc, setImgSrc] = useState(item.imageUrl || null);
-  const [step, setStep]     = useState(item.imageUrl ? 0 : 1); // 0=product 1=ootd 2=icon
+  // 우선순위: item.imageUrl(웹검색/AI) → item._cropUrl(OOTD 크롭) → ootdDataUrl(원본) → 카테고리 아이콘
+  const isLoading = item._imgLoading;
+  const initialSrc = item.imageUrl || item._cropUrl || null;
+  const [imgSrc, setImgSrc] = useState(initialSrc);
+  const [step, setStep]     = useState(item.imageUrl ? 0 : item._cropUrl ? 1 : 2); // 0=웹 1=크롭 2=ootd원본 3=아이콘
+  const [loaded, setLoaded] = useState(false);
+
+  // item이 비동기로 업데이트되면 imgSrc도 동기화
+  useEffect(() => {
+    if (item.imageUrl && step !== 0)      { setImgSrc(item.imageUrl); setStep(0); setLoaded(false); }
+    else if (item._cropUrl && step >= 2)  { setImgSrc(item._cropUrl); setStep(1); setLoaded(false); }
+  }, [item.imageUrl, item._cropUrl]);
 
   const handleError = () => {
-    if (step === 0) { setStep(1); setImgSrc(ootdDataUrl); }
-    else            { setStep(2); setImgSrc(null); }
+    if (step === 0 && item._cropUrl) { setStep(1); setImgSrc(item._cropUrl); setLoaded(false); }
+    else if (step <= 1)              { setStep(2); setImgSrc(ootdDataUrl); setLoaded(false); }
+    else                             { setStep(3); setImgSrc(null); }
   };
 
-  if (step === 2 || (!imgSrc && step !== 0)) {
+  // 스켈레톤 — 분석 직후 이미지 검색 중
+  if (isLoading && !imgSrc) {
+    return (
+      <div style={{
+        width: 56, height: 56, borderRadius: 12, flexShrink: 0, position: 'relative', overflow: 'hidden',
+        background: 'linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.10) 50%, rgba(255,255,255,0.04) 100%)',
+        backgroundSize: '200% 100%',
+        animation: 'ppShimmer 1.4s linear infinite',
+        border: '1px solid rgba(255,255,255,0.06)',
+      }}/>
+    );
+  }
+
+  // 카테고리 아이콘 fallback
+  if (step === 3 || (!imgSrc && step >= 2 && !ootdDataUrl)) {
     const IconFn = CAT_ICONS[item.category] || CAT_ICONS['소품'];
     return (
       <div style={{
         width: 56, height: 56, borderRadius: 12, flexShrink: 0,
-        background: `${catColor}18`,
-        border: `1.5px solid ${catColor}40`,
+        background: `${catColor}18`, border: `1.5px solid ${catColor}40`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         {IconFn(catColor)}
@@ -714,13 +821,39 @@ function ItemThumbnail({ item, ootdDataUrl, catColor }) {
     );
   }
 
+  // confidence 'low' 또는 OOTD 크롭일 때 ? 뱃지 표시
+  const showQ = step >= 1 || item._imgConfidence === 'low';
+
   return (
-    <div style={{ width: 56, height: 56, borderRadius: 12, flexShrink: 0, overflow: 'hidden', background: '#2a2a2a' }}>
+    <div style={{ width: 56, height: 56, borderRadius: 12, flexShrink: 0, overflow: 'hidden', background: '#2a2a2a', position: 'relative' }}>
       <img
         src={imgSrc || ootdDataUrl}
         onError={handleError}
-        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        onLoad={() => setLoaded(true)}
+        style={{
+          width: '100%', height: '100%', objectFit: 'cover', display: 'block',
+          opacity: loaded ? 1 : 0,
+          transition: 'opacity 0.25s ease',
+        }}
       />
+      {!loaded && (
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.10) 50%, rgba(255,255,255,0.04) 100%)',
+          backgroundSize: '200% 100%',
+          animation: 'ppShimmer 1.4s linear infinite',
+        }}/>
+      )}
+      {showQ && loaded && (
+        <div style={{
+          position: 'absolute', top: 3, right: 3,
+          width: 14, height: 14, borderRadius: '50%',
+          background: 'rgba(255,160,64,0.92)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontFamily: '"Space Grotesk",sans-serif', fontSize: 9, fontWeight: 800, color: '#1a1a1a',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
+        }} title="이미지 정확도가 낮아요. 수정해보세요.">?</div>
+      )}
     </div>
   );
 }
@@ -738,8 +871,10 @@ function WardrobeSaveSheet({ imageDataUrl, onClose, onSaved }) {
   };
 
   useEffect(() => {
+    let cancelled = false;
     analyzeOotdForItems(imageDataUrl)
-      .then(detected => {
+      .then(async detected => {
+        if (cancelled) return;
         const allExisting = [...dummyProducts, ..._userWardrobeAdditions];
         const withMeta = detected.map((item, i) => {
           const brand = (item.brand || '').toLowerCase();
@@ -748,12 +883,49 @@ function WardrobeSaveSheet({ imageDataUrl, onClose, onSaved }) {
             brand && (p.brand||'').toLowerCase() === brand &&
             (p.name||'').toLowerCase().includes(name)
           );
-          return { ...item, _id: i, _included: !isDup, _editing: false, _dup: isDup };
+          return {
+            ...item, _id: i, _included: !isDup, _editing: false, _dup: isDup,
+            _imgLoading: !item.imageUrl, // AI가 직접 URL 줬으면 로딩 X
+          };
         });
         setItems(withMeta);
         setPhase('review');
+
+        // ── 비동기 이미지 확보: 웹검색 → OOTD 크롭 (병렬) ──
+        await Promise.all(withMeta.map(async (item) => {
+          if (cancelled) return;
+          // 1순위: 웹검색
+          if (!item.imageUrl) {
+            const found = await findProductImage({
+              brand: item.brand, name: item.name, category: item.category,
+            });
+            if (cancelled) return;
+            if (found && found.imageUrl) {
+              setItems(prev => prev.map(it => it._id === item._id
+                ? { ...it, imageUrl: found.imageUrl, _imgConfidence: found.confidence || null, _imgLoading: false }
+                : it));
+              return;
+            }
+          }
+          // 2순위: OOTD 크롭
+          if (!cancelled && Array.isArray(item.bbox) && item.bbox.length === 4) {
+            const cropped = await cropDataUrl(imageDataUrl, item.bbox);
+            if (cancelled) return;
+            if (cropped) {
+              setItems(prev => prev.map(it => it._id === item._id
+                ? { ...it, _cropUrl: cropped, _imgLoading: false }
+                : it));
+              return;
+            }
+          }
+          // 3순위: OOTD 원본 (기존 동작) → ItemThumbnail이 처리
+          if (!cancelled) {
+            setItems(prev => prev.map(it => it._id === item._id ? { ...it, _imgLoading: false } : it));
+          }
+        }));
       })
-      .catch(e => { setErrMsg(e.message); setPhase('review'); });
+      .catch(e => { if (!cancelled) { setErrMsg(e.message); setPhase('review'); } });
+    return () => { cancelled = true; };
   }, []);
 
   const update = (id, patch) =>
@@ -786,20 +958,20 @@ function WardrobeSaveSheet({ imageDataUrl, onClose, onSaved }) {
       top: 110, left: 0, right: 0, bottom: 0,
       zIndex: 300,
       background: 'rgba(0,0,0,0.68)',
-      display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+      display: 'flex', flexDirection: 'column', justifyContent: 'flex-start',
       animation: 'ppFadeIn 0.18s ease both',
     }}>
-      {/* 팝업 패널 — 상단 30px 여백으로 OOTD 사진 상단 살짝 노출 */}
+      {/* 팝업 패널 — 상단 슬라이드 다운, 하단 30px 여백으로 OOTD 사진 살짝 노출 */}
       <div onClick={e => e.stopPropagation()} style={{
         width: '100%', maxHeight: 'calc(100% - 30px)',
         background: '#1a1a1a',
-        borderRadius: '22px 22px 0 0',
+        borderRadius: '0 0 22px 22px',
         border: '1px solid rgba(255,255,255,0.1)',
-        borderBottom: 'none',
+        borderTop: 'none',
         display: 'flex', flexDirection: 'column',
         overflow: 'hidden',
-        boxShadow: '0 -8px 40px rgba(0,0,0,0.6)',
-        animation: 'ppSlideUp 0.28s cubic-bezier(0.22,1,0.36,1) both',
+        boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+        animation: 'ppSlideDownPanel 0.28s cubic-bezier(0.22,1,0.36,1) both',
       }}>
 
         {/* 헤더 */}
